@@ -26,6 +26,16 @@ export const DRIZZLE_ORM = Symbol('DRIZZLE_ORM');
           max: poolMax,
           idle_timeout: 20,
           max_lifetime: 60 * 30,
+          // Prepare statements to improve query performance
+          prepare: true,
+          // Enable debug mode in development
+          debug: process.env.NODE_ENV === 'development' ? console.log : undefined,
+          // Connection lifecycle hooks
+          onnotice: process.env.NODE_ENV === 'development' ? console.log : undefined,
+          // Transform undefined to null for better PostgreSQL compatibility
+          transform: {
+            undefined: null,
+          },
         });
 
         return drizzle(queryClient, { schema });

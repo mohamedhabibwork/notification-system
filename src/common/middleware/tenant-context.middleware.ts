@@ -55,36 +55,16 @@ export class TenantContextMiddleware implements NestMiddleware {
       tenantId = parseInt(req.headers['x-tenant-id'] as string, 10);
     }
 
-    // Store tenant context in request for later use
+    // Store tenant context in request for application use
+    // Don't set database session variables in middleware - causes connection pool issues
     if (tenantId) {
       (req as any).tenantId = tenantId;
-      this.logger.debug(`Tenant context set: ${tenantId}`);
-
-      try {
-        // Set PostgreSQL session variable for RLS
-        await setTenantContext(this.db, tenantId);
-
-        // Set database role based on request type
-        if (isServiceRequest) {
-          await setSessionRole(this.db, 'service_role');
-        } else {
-          await setSessionRole(this.db, 'authenticated');
-        }
-      } catch (error) {
-        this.logger.error(
-          `Failed to set tenant context: ${error.message}`,
-          error.stack,
-        );
-        // Continue anyway - the application logic can still work
-      }
-    } else if (isServiceRequest) {
-      // Service requests without tenant = full access
-      try {
-        await setSessionRole(this.db, 'service_role');
-      } catch (error) {
-        this.logger.error(`Failed to set service role: ${error.message}`);
-      }
+      this.logger.debug(`Tenant context stored in request: ${tenantId}`);
     }
+
+    // Note: Database-level tenant context (RLS) is managed per-transaction
+    // using the withTenantContext() helper function in services
+    // This avoids connection pool contamination issues
 
     next();
   }

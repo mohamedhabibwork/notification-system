@@ -6,6 +6,7 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import helmet from 'helmet';
 import compression from 'compression';
 import { join } from 'path';
+import { Request, Response } from 'express';
 import { AppModule } from './app.module';
 import { CustomLoggerService } from './common/logger/logger.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -19,6 +20,10 @@ async function bootstrap() {
   // Get configuration
   const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port', 3000);
+  const host = configService.get<string>('app.host', '0.0.0.0');
+  // Use localhost for Swagger/OAuth URLs (0.0.0.0 is not valid in browser)
+  const publicHost = host === '0.0.0.0' ? 'localhost' : host;
+  const appUrl = `http://${publicHost}:${port}`;
   const environment = configService.get<string>(
     'app.environment',
     'development',
@@ -68,12 +73,10 @@ async function bootstrap() {
     prefix: 'api/v',
   });
 
-  // Swagger configuration
-  const authorizationUrl = `${keycloakServerUrl}/realms/${keycloakRealm}/protocol/openid-connect/auth`;
-  const tokenUrl = `${keycloakServerUrl}/realms/${keycloakRealm}/protocol/openid-connect/token`;
-  const swaggerRedirectUrl = `http://localhost:${port}/api/oauth2-redirect.html`;
-
-  const config = new DocumentBuilder()
+  // Swagger configuration - OAuth2 redirect URL must match the route in auth.controller.ts
+  const swaggerRedirectUrl = `${appUrl}/api/oauth2-redirect.html`;
+  
+  const configBuilder = new DocumentBuilder()
     .setTitle('Multi-Tenant Notification System API')
     .setDescription(
       `
@@ -82,15 +85,23 @@ async function bootstrap() {
       
       ## Authentication
       
-      This API supports dual authentication:
-      - **User Authentication**: OAuth2/OIDC for user-facing APIs (manage own notifications)
-      - **Service Authentication**: Client credentials flow for service-to-service calls
+      This API uses Bearer token authentication. Include your JWT token in the Authorization header:
+      \`\`\`
+      Authorization: Bearer <your-token>
+      \`\`\`
+      
+      ### Getting a Token
+      
+      1. **Via Keycloak (OAuth2)**: Click the "Authorize" button and use OAuth2 flow
+      2. **Via Direct Token**: Get token from Keycloak and paste it in the Bearer auth field
       
       ## API Groups
       
       - **User APIs** (/api/v1/users/me/*): User-facing endpoints for managing own notifications
       - **Service APIs** (/api/v1/services/*): Service-to-service endpoints for sending notifications
       - **Admin APIs** (/api/v1/admin/*): Administrative endpoints for managing templates, providers, etc.
+      - **Tenant APIs** (/api/v1/tenants/*): Tenant-scoped resource management
+      - **Provider APIs** (/api/v1/providers/*): Provider-template integration endpoints
       - **System APIs** (/health, /metrics): Health checks and monitoring
     `,
     )
@@ -100,38 +111,15 @@ async function bootstrap() {
       'https://github.com',
       'support@notification.local',
     )
-    .addServer(`http://localhost:${port}`, 'Development')
-    .addOAuth2(
-      {
-        type: 'oauth2',
-        flows: {
-          authorizationCode: {
-            authorizationUrl,
-            tokenUrl,
-            scopes: {
-              openid: 'OpenID Connect',
-              profile: 'User profile information',
-              email: 'User email address',
-            },
-          },
-          clientCredentials: {
-            tokenUrl,
-            scopes: {
-              'notification:send': 'Send notifications',
-              'notification:manage': 'Manage notifications',
-            },
-          },
-        },
-        description: 'OAuth2 authentication using Keycloak',
-      },
-      'oauth2',
-    )
+    .addServer(appUrl, 'Development')
     .addBearerAuth(
       {
         type: 'http',
         scheme: 'bearer',
         bearerFormat: 'JWT',
-        description: 'Enter JWT token for user or service authentication',
+        description: 'Enter JWT token obtained from Keycloak',
+        in: 'header',
+        name: 'Authorization',
       },
       'bearer',
     )
@@ -144,32 +132,95 @@ async function bootstrap() {
     .addTag('Admin - Tenants', 'Tenant management')
     .addTag('Admin - Templates', 'Notification template management')
     .addTag('Admin - Providers', 'Channel provider configuration')
+    .addTag('Tenants - Providers', 'Tenant-scoped provider management')
+    .addTag('Tenants - Templates', 'Tenant-scoped template management')
+    .addTag('Providers - Templates', 'Provider-template integration')
     .addTag('Lookups', 'Lookup values (statuses, priorities, etc.)')
-    .addTag('System', 'Health checks and monitoring')
-    .build();
+    .addTag('System', 'Health checks and monitoring');
 
+  // Add OAuth2 only if Keycloak is properly configured
+  if (keycloakServerUrl && keycloakRealm && keycloakUserClientId) {
+    const authorizationUrl = `${keycloakServerUrl}/realms/${keycloakRealm}/protocol/openid-connect/auth`;
+    const tokenUrl = `${keycloakServerUrl}/realms/${keycloakRealm}/protocol/openid-connect/token`;
+    
+    configBuilder.addOAuth2(
+      {
+        type: 'oauth2',
+        flows: {
+          authorizationCode: {
+            authorizationUrl,
+            tokenUrl,
+            scopes: {
+              openid: 'OpenID Connect',
+              profile: 'User profile information',
+              email: 'User email address',
+            },
+          },
+        },
+        description: 'OAuth2 authentication using Keycloak',
+      },
+      'oauth2',
+    );
+
+    // Log OAuth2 configuration for debugging
+    logger.log('\n🔐 OAuth2 Configuration:');
+    logger.log(`   Authorization URL: ${authorizationUrl}`);
+    logger.log(`   Token URL: ${tokenUrl}`);
+    logger.log(`   Redirect URI: ${swaggerRedirectUrl}`);
+    logger.log(`   Client ID: ${keycloakUserClientId}`);
+    logger.log('\n⚠️  KEYCLOAK CLIENT CONFIGURATION REQUIRED:');
+    logger.log('   1. Access Type: MUST be "public" (NOT confidential)');
+    logger.log('   2. Standard Flow Enabled: MUST be ON');
+    logger.log(`   3. Valid Redirect URIs: MUST include "${swaggerRedirectUrl}"`);
+    logger.log(`   4. Web Origins: MUST include "${appUrl}" or "*"`);
+    logger.log('   5. PKCE: Should be enabled (default for public clients)');
+  }
+
+  const config = configBuilder.build();
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('api', app, document, {
+  // Swagger UI setup options
+  const swaggerOptions: any = {
     swaggerOptions: {
       persistAuthorization: true,
-      oauth2RedirectUrl: swaggerRedirectUrl,
-      initOAuth: {
-        clientId: keycloakUserClientId,
-        realm: keycloakRealm,
-        appName: 'Notification Service',
-        scopeSeparator: ' ',
-        additionalQueryStringParams: {},
-        useBasicAuthenticationWithAccessCodeGrant: false,
-        usePkceWithAuthorizationCodeGrant: true,
+      displayOperationId: false,
+      filter: true,
+      tryItOutEnabled: true,
+      syntaxHighlight: {
+        activate: true,
+        theme: 'monokai',
       },
+      docExpansion: 'none',
+      defaultModelsExpandDepth: 3,
+      defaultModelExpandDepth: 3,
     },
     customSiteTitle: 'Notification Service API',
     customCss: `
       .swagger-ui .topbar { display: none }
       .swagger-ui .info { margin-top: 20px }
+      .swagger-ui .scheme-container { margin: 20px 0; }
+      .swagger-ui .auth-wrapper { margin-top: 20px; }
     `,
-  });
+    customJs: [
+      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.3/swagger-ui-standalone-preset.min.js',
+    ],
+  };
+
+  // Only add OAuth2 redirect if Keycloak is configured
+  if (keycloakServerUrl && keycloakRealm && keycloakUserClientId) {
+    swaggerOptions.swaggerOptions.oauth2RedirectUrl = swaggerRedirectUrl;
+    swaggerOptions.swaggerOptions.initOAuth = {
+      clientId: keycloakUserClientId,
+      appName: 'Notification Service',
+      scopeSeparator: ' ',
+      scopes: 'openid profile email',
+      additionalQueryStringParams: {},
+      useBasicAuthenticationWithAccessCodeGrant: false,
+      usePkceWithAuthorizationCodeGrant: true,
+    };
+  }
+
+  SwaggerModule.setup('api', app, document, swaggerOptions);
 
   // Global prefix
   app.setGlobalPrefix('');
@@ -207,13 +258,13 @@ async function bootstrap() {
 
   logger.log(`🚀 Notification Service started on port ${port}`);
   logger.log(`📝 Environment: ${environment}`);
-  logger.log(`📚 Swagger UI: http://localhost:${port}/api`);
-  logger.log(`📚 GraphQL Playground: http://localhost:${port}/graphql`);
-  logger.log(`🔗 Health check: http://localhost:${port}/health`);
-  logger.log(`📊 Metrics: http://localhost:${port}/metrics`);
+  logger.log(`📚 Swagger UI: ${appUrl}/api`);
+  logger.log(`📚 GraphQL Playground: ${appUrl}/graphql`);
+  logger.log(`🔗 Health check: ${appUrl}/health`);
+  logger.log(`📊 Metrics: ${appUrl}/metrics`);
 
   if (grpcEnabled) {
-    logger.log(`🔌 gRPC endpoint: localhost:${grpcPort}`);
+    logger.log(`🔌 gRPC endpoint: ${appUrl}:${grpcPort}`);
   }
 }
 

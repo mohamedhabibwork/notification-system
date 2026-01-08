@@ -35,212 +35,176 @@ import {
 import { AuthInfoResponseDto } from './dto/auth-info.dto';
 
 @ApiTags('Authentication')
-@Controller()
+@Controller('api')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
   ) {}
 
-  @Get('api/oauth2-redirect.html')
-  @Public()
+  /**
+   * OAuth2 redirect handler for Swagger UI
+   * This HTML page is used by Swagger UI to complete the OAuth2/OIDC authorization flow
+   */
+  @Get('oauth2-redirect.html')
   @ApiExcludeEndpoint()
-  @ApiOperation({ summary: 'OAuth2 redirect handler for Swagger UI' })
-  oauth2Redirect(
-    @Res() res: Response,
-    @Query() query: Record<string, string | undefined>,
-  ) {
-    if (query.error) {
+  @Public()
+  oauth2Redirect(@Res() res: Response, @Query() query: Record<string, string>) {
+    const keycloakConfigured = 
+      this.configService.get<string>('keycloak.serverUrl') &&
+      this.configService.get<string>('keycloak.realm') &&
+      this.configService.get<string>('keycloak.userClientId');
+
+    // Log query parameters for debugging
+    if (query.error as string) {
       console.error('OAuth2 Error:', {
-        error: query.error,
-        error_description: query.error_description,
-        error_uri: query.error_uri,
+        error: query.error as string,
+        error_description: query.error_description as string,
+        error_uri: query.error_uri as string,
       });
     }
-
+    
+    // This is the standard OAuth2/OIDC redirect HTML that Swagger UI expects
     const html = `<!doctype html>
 <html lang="en-US">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swagger UI: OAuth2 Redirect</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             margin: 0;
-            background: #f5f5f5;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #fafafa;
         }
-        .container {
+        .message {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 30px;
             background: white;
-            padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: center;
-            max-width: 500px;
         }
-        .success {
-            color: #28a745;
-        }
-        .error {
-            color: #dc3545;
-        }
-        .info {
-            color: #17a2b8;
-        }
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .error { color: #d32f2f; }
+        .success { color: #388e3c; }
+        .info { color: #1976d2; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div id="loading">
-            <div class="spinner"></div>
-            <p class="info">Processing OAuth2 redirect...</p>
-        </div>
-        <div id="success" style="display: none;">
-            <p class="success">✓ Authentication successful! This window will close automatically.</p>
-        </div>
-        <div id="error" style="display: none;">
-            <p class="error" id="error-message"></p>
-            <p><small>You can close this window manually.</small></p>
-        </div>
+    <div id="message" class="message info">
+        <h2>Completing authentication...</h2>
+        <p>Please wait while we redirect you back to Swagger UI.</p>
     </div>
-    <script>
-        'use strict';
-        function showSuccess() {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('success').style.display = 'block';
-        }
-        function showError(message) {
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('error').style.display = 'block';
-            document.getElementById('error-message').textContent = message;
-        }
-        
-        
-        function run() {
-            try {
-                // Check if window.opener exists and is accessible
-                if (!window.opener || window.opener.closed) {
-                    showError('No parent window found. Please initiate OAuth2 flow from Swagger UI.');
-                    return;
-                }
-
-                // Check if Swagger UI redirect handler exists
-                var swaggerHandler = window.opener.swaggerUIRedirectOauth2;
-                if (!swaggerHandler) {
-                    showError('Swagger UI redirect handler not found. Please try again from Swagger UI.');
-                    return;
-                }
-
-                var oauth2 = swaggerHandler;
-                var sentState = oauth2.state;
-                var redirectUrl = oauth2.redirectUrl;
-                var isValid, qp, arr;
-
-                // Parse query parameters from hash or search
-                if (/code|token|error/.test(window.location.hash)) {
-                    qp = window.location.hash.substring(1);
-                } else {
-                    qp = location.search.substring(1);
-                }
-
-                // Parse query string into object
-                arr = qp.split("&");
-                arr.forEach(function (v, i, _arr) {
-                    _arr[i] = '"' + v.replace('=', '":"') + '"';
-                });
-                qp = qp ? JSON.parse('{' + arr.join() + '}',
-                    function (key, value) {
-                        return key === "" ? value : decodeURIComponent(value);
-                    }
-                ) : {};
-
-                isValid = qp.state === sentState;
-
-                // Handle authorization code flow
-                if ((
-                    oauth2.auth.schema.get("flow") === "accessCode" ||
-                    oauth2.auth.schema.get("flow") === "authorizationCode" ||
-                    oauth2.auth.schema.get("flow") === "authorization_code"
-                ) && !oauth2.auth.code) {
-                    if (!isValid) {
-                        try {
-                            oauth2.errCb({
-                                authId: oauth2.auth.name,
-                                source: "auth",
-                                level: "warning",
-                                message: "Authorization may be unsafe, passed state was changed in server. The passed state wasn't returned from auth server."
-                            });
-                        } catch (e) {
-                            console.warn('Could not send warning to opener:', e);
-                        }
-                    }
-
-                    if (qp.code) {
-                        delete oauth2.state;
-                        oauth2.auth.code = qp.code;
-                        oauth2.callback({auth: oauth2.auth, redirectUrl: redirectUrl});
-                        showSuccess();
-                        setTimeout(function() {
-                            window.close();
-                        }, 1000);
-                    } else {
-                        var oauthErrorMsg = qp.error ? 
-                            "[" + qp.error + "]: " + (qp.error_description || "no accessCode received from the server") :
-                            "Authorization failed: no access code received from the server";
-                        
-                        oauth2.errCb({
-                            authId: oauth2.auth.name,
-                            source: "auth",
-                            level: "error",
-                            message: oauthErrorMsg
-                        });
-                        showError(oauthErrorMsg);
-                    }
-                } else {
-                    // Handle other flows (implicit, etc.)
-                    oauth2.callback({auth: oauth2.auth, token: qp, isValid: isValid, redirectUrl: redirectUrl});
-                    showSuccess();
-                    setTimeout(function() {
-                        window.close();
-                    }, 1000);
-                }
-            } catch (error) {
-                console.error('OAuth2 redirect error:', error);
-                var errorMessage = 'An error occurred during OAuth2 redirect.';
-                if (error && error.message) {
-                    errorMessage += ' ' + error.message;
-                }
-                if (error && error.toString) {
-                    errorMessage += ' (' + error.toString() + ')';
-                }
-                showError(errorMessage);
+<script>
+    'use strict';
+    function run() {
+        try {
+            // Check if window.opener exists and has the required Swagger UI object
+            if (!window.opener) {
+                throw new Error('No opener window found. Please ensure this page was opened by Swagger UI.');
             }
-        }
 
-        // Run when DOM is ready
-        if (document.readyState !== 'loading') {
-            run();
-        } else {
-            document.addEventListener('DOMContentLoaded', run);
+            if (!window.opener.swaggerUIRedirectOauth2) {
+                throw new Error('Swagger UI redirect object not found. Please try again from the Swagger UI page.');
+            }
+
+            var oauth2 = window.opener.swaggerUIRedirectOauth2;
+            var sentState = oauth2.state;
+            var redirectUrl = oauth2.redirectUrl;
+            var isValid, qp, arr;
+
+            // Parse query parameters from hash or search
+            if (/code|token|error/.test(window.location.hash)) {
+                qp = window.location.hash.substring(1);
+            } else {
+                qp = location.search.substring(1);
+            }
+
+            arr = qp.split("&");
+            arr.forEach(function (v, i, _arr) { 
+                _arr[i] = '"' + v.replace('=', '":"') + '"';
+            });
+            
+            qp = qp ? JSON.parse('{' + arr.join() + '}',
+                function (key, value) {
+                    return key === "" ? value : decodeURIComponent(value);
+                }
+            ) : {};
+
+            isValid = qp.state === sentState;
+
+            // Handle authorization code flow (OIDC/OAuth2)
+            if ((
+                oauth2.auth.schema.get("flow") === "accessCode" ||
+                oauth2.auth.schema.get("flow") === "authorizationCode" ||
+                oauth2.auth.schema.get("flow") === "authorization_code"
+            ) && !oauth2.auth.code) {
+                if (!isValid) {
+                    oauth2.errCb({
+                        authId: oauth2.auth.name,
+                        source: "auth",
+                        level: "warning",
+                        message: "Authorization may be unsafe, passed state was changed in server. The passed state wasn't returned from auth server."
+                    });
+                }
+
+                if (qp.code) {
+                    delete oauth2.state;
+                    oauth2.auth.code = qp.code;
+                    oauth2.callback({auth: oauth2.auth, redirectUrl: redirectUrl});
+                    
+                    document.getElementById('message').innerHTML = 
+                        '<h2 class="success">✓ Authentication Successful</h2>' +
+                        '<p>You can close this window.</p>';
+                } else {
+                    let oauthErrorMsg;
+                    if (qp.error) {
+                        oauthErrorMsg = "[" + qp.error + "]: " +
+                            (qp.error_description ? qp.error_description + ". " : "no accessCode received from the server. ") +
+                            (qp.error_uri ? "More info: " + qp.error_uri : "");
+                    }
+
+                    oauth2.errCb({
+                        authId: oauth2.auth.name,
+                        source: "auth",
+                        level: "error",
+                        message: oauthErrorMsg || "[Authorization failed]: no accessCode received from the server"
+                    });
+                    
+                    document.getElementById('message').innerHTML = 
+                        '<h2 class="error">✗ Authentication Failed</h2>' +
+                        '<p>' + (oauthErrorMsg || 'No access code received') + '</p>';
+                }
+            } else {
+                // Handle implicit flow or token refresh
+                oauth2.callback({auth: oauth2.auth, token: qp, isValid: isValid, redirectUrl: redirectUrl});
+                
+                document.getElementById('message').innerHTML = 
+                    '<h2 class="success">✓ Authentication Successful</h2>' +
+                    '<p>You can close this window.</p>';
+            }
+            
+            // Auto-close window after successful auth
+            setTimeout(function() {
+                window.close();
+            }, 1000);
+            
+        } catch (error) {
+            console.error('OAuth2 redirect error:', error);
+            document.getElementById('message').innerHTML = 
+                '<h2 class="error">✗ Authentication Error</h2>' +
+                '<p>' + error.message + '</p>' +
+                '<p><a href="/api">Return to Swagger UI</a></p>';
         }
-    </script>
+    }
+
+    if (document.readyState !== 'loading') {
+        run();
+    } else {
+        document.addEventListener('DOMContentLoaded', run);
+    }
+</script>
 </body>
 </html>`;
 
@@ -248,7 +212,8 @@ export class AuthController {
     res.send(html);
   }
 
-  @Post('api/v1/auth/refresh')
+
+  @Post('v1/auth/refresh')
   @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
@@ -266,7 +231,7 @@ export class AuthController {
     return this.authService.refreshToken(dto.refresh_token);
   }
 
-  @Get('api/v1/auth/info')
+  @Get('v1/auth/info')
   @ApiBearerAuth('bearer')
   @ApiOperation({
     summary: 'Get current authentication information',
@@ -300,7 +265,7 @@ export class AuthController {
     );
   }
 
-  @Post('api/v1/auth/validate')
+  @Post('v1/auth/validate')
   @Public()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -320,7 +285,7 @@ export class AuthController {
     return await this.authService.validateToken(dto.token);
   }
 
-  @Get('api/v1/auth/config')
+  @Get('v1/auth/config')
   @Public()
   @ApiOperation({
     summary: 'Get OAuth2 configuration information',

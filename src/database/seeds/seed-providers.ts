@@ -1,6 +1,6 @@
 /**
  * Provider Seeding Data
- * 
+ *
  * Define notification channel providers and their configurations.
  * This allows database-driven provider management alongside environment variables.
  */
@@ -13,7 +13,7 @@ export interface SeedProvider {
   isDefault: boolean;
   isActive: boolean;
   priority: number;
-  configuration: Record<string, any>;
+  configuration: Record<string, unknown>;
   description?: string;
 }
 

@@ -55,9 +55,8 @@ export class WebhookClientService {
       }
 
       // Get full configuration
-      const config = await this.webhookConfigService.findActiveByTenant(
-        tenantId,
-      );
+      const config =
+        await this.webhookConfigService.findActiveByTenant(tenantId);
 
       if (!config) {
         return false;

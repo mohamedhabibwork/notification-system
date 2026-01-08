@@ -52,12 +52,12 @@ export class EncryptionService {
     return decrypted;
   }
 
-  encryptObject(obj: Record<string, any>): string {
+  encryptObject(obj: Record<string, unknown>): string {
     const jsonString = JSON.stringify(obj);
     return this.encrypt(jsonString);
   }
 
-  decryptObject<T = Record<string, any>>(encryptedData: string): T {
+  decryptObject<T = Record<string, unknown>>(encryptedData: string): T {
     const decrypted = this.decrypt(encryptedData);
     return JSON.parse(decrypted) as T;
   }

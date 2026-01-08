@@ -18,7 +18,7 @@ interface DatabaseJob {
     subject?: string;
     body: string;
   };
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 @Processor('database')

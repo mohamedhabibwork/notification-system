@@ -22,7 +22,7 @@ export const lookups = pgTable('lookups', {
   description: varchar('description', { length: 500 }),
   sortOrder: integer('sort_order').default(0),
   isActive: boolean('is_active').default(true).notNull(),
-  metadata: jsonb('metadata').$type<Record<string, any>>(),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

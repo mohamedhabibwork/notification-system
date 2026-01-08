@@ -18,7 +18,7 @@ export class NotificationResponseDto {
   failedAt?: Date;
   failureReason?: string;
   retryCount: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
 }
 

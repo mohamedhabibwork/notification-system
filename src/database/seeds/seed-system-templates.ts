@@ -8,7 +8,7 @@ export async function seedSystemTemplates(db: any): Promise<void> {
 
   const handlebarsConfig = new HandlebarsConfigService();
   const templateLoader = new TemplateLoaderService(handlebarsConfig);
-  
+
   // Initialize partials
   await templateLoader.onModuleInit();
 
@@ -19,7 +19,7 @@ export async function seedSystemTemplates(db: any): Promise<void> {
     try {
       // Load template content from .hbs file
       const htmlTemplate = await templateLoader.loadTemplate(meta.filePath);
-      
+
       // Create plain text body from HTML (strip tags and normalize whitespace)
       const bodyTemplate = htmlTemplate
         .replace(/<[^>]*>/g, ' ')
@@ -53,5 +53,7 @@ export async function seedSystemTemplates(db: any): Promise<void> {
     }
   }
 
-  console.log(`\n✅ Seeded ${seededCount} system templates${skippedCount > 0 ? ` (${skippedCount} skipped)` : ''}`);
+  console.log(
+    `\n✅ Seeded ${seededCount} system templates${skippedCount > 0 ? ` (${skippedCount} skipped)` : ''}`,
+  );
 }

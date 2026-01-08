@@ -6,7 +6,7 @@ import { join } from 'path';
 
 /**
  * GraphQL Configuration Module (Optional)
- * 
+ *
  * This module is disabled by default until GraphQL resolvers are implemented.
  * To enable: Set GRAPHQL_ENABLED=true in .env and uncomment in app.module.ts
  */
@@ -20,8 +20,11 @@ export class GraphqlConfigModule {
           driver: ApolloDriver,
           inject: [ConfigService],
           useFactory: async (configService: ConfigService) => {
-            const enabled = configService.get<boolean>('graphql.enabled', false);
-            
+            const enabled = configService.get<boolean>(
+              'graphql.enabled',
+              false,
+            );
+
             if (!enabled) {
               // Return minimal config that won't initialize GraphQL
               return {

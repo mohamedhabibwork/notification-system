@@ -16,7 +16,7 @@ import {
 
 /**
  * gRPC Tenant Context Interceptor
- * 
+ *
  * Extracts tenant information from gRPC metadata and sets PostgreSQL
  * session variables for Row-Level Security (RLS).
  */
@@ -42,7 +42,7 @@ export class GrpcTenantInterceptor implements NestInterceptor {
   private async handleGrpcContext(context: ExecutionContext): Promise<void> {
     try {
       const metadata = context.getArgByIndex(1);
-      
+
       if (!metadata) {
         return;
       }

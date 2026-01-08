@@ -20,9 +20,10 @@ export class MetricsController {
   @Get()
   @Public()
   @Header('Content-Type', 'text/plain; version=0.0.4; charset=utf-8')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get Prometheus metrics',
-    description: 'Returns all application metrics in Prometheus format for scraping by Prometheus server'
+    description:
+      'Returns all application metrics in Prometheus format for scraping by Prometheus server',
   })
   @ApiResponse({
     status: 200,
@@ -32,8 +33,9 @@ export class MetricsController {
   async getMetrics() {
     // Get metrics from both services and combine them
     const basicMetrics = this.metricsService.getPrometheusMetrics();
-    const observabilityMetrics = await this.observabilityMetricsService.getMetrics();
-    
+    const observabilityMetrics =
+      await this.observabilityMetricsService.getMetrics();
+
     // Return observability metrics (prom-client) as it's more comprehensive
     return observabilityMetrics;
   }

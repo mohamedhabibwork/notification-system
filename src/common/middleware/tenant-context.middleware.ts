@@ -18,7 +18,7 @@ import {
  * 2. Sets the PostgreSQL session variable app.current_tenant_id
  * 3. Sets the database role (authenticated for users, service_role for internal)
  * 4. Stores tenant context in request for application use
- * 
+ *
  * Note: This middleware is for HTTP/REST requests only.
  * - gRPC requests: Use GrpcTenantInterceptor
  * - GraphQL requests: Use GraphQL context

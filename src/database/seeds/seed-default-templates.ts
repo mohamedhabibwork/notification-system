@@ -1,15 +1,9 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 import * as dotenv from 'dotenv';
-import {
-  notificationTemplates,
-  templateCategories,
-} from '../schema';
+import { notificationTemplates, templateCategories } from '../schema';
 import { eq, and } from 'drizzle-orm';
-import {
-  defaultTemplates,
-  defaultCategories,
-} from './default-templates';
+import { defaultTemplates, defaultCategories } from './default-templates';
 
 dotenv.config();
 
@@ -118,7 +112,7 @@ export async function seedDefaultTemplatesForTenant(
 // Run directly if executed as a script
 if (require.main === module) {
   const tenantId = parseInt(process.argv[2]);
-  
+
   if (!tenantId) {
     console.error('Usage: ts-node seed-default-templates.ts <tenantId>');
     process.exit(1);

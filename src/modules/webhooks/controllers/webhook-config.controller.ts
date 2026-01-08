@@ -130,7 +130,7 @@ export class WebhookConfigController {
     @CurrentTenant() tenantId: number,
   ): Promise<WebhookTestResponseDto> {
     const config = await this.webhookConfigService.findOne(id, tenantId);
-    
+
     const testPayload = {
       event: testDto.eventType,
       timestamp: new Date().toISOString(),
@@ -188,7 +188,7 @@ export class WebhookConfigController {
     return this.webhookConfigService.getDeliveryLogs(tenantId, limit, offset);
   }
 
-  private getSamplePayload(eventType: string): Record<string, any> {
+  private getSamplePayload(eventType: string): Record<string, unknown> {
     const baseSample = {
       event: eventType,
       timestamp: new Date().toISOString(),

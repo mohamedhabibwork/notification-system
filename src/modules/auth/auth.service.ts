@@ -183,7 +183,7 @@ export class AuthService {
 
     if ('sub' in user) {
       // User context
-      const userContext = user as UserContext;
+      const userContext = user;
       const exp = userContext.exp || 0;
       const expiresIn = exp > 0 ? Math.max(0, exp - now) : 0;
 
@@ -218,7 +218,7 @@ export class AuthService {
       };
     } else {
       // Service context
-      const serviceContext = user as ServiceContext;
+      const serviceContext = user;
       const exp = serviceContext.exp || 0;
       const expiresIn = exp > 0 ? Math.max(0, exp - now) : 0;
 

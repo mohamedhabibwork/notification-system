@@ -35,11 +35,13 @@ export const notifications = pgTable(
     recipientUserType: varchar('recipient_user_type', { length: 100 }),
     recipientEmail: varchar('recipient_email', { length: 255 }),
     recipientPhone: varchar('recipient_phone', { length: 50 }),
-    recipientMetadata: jsonb('recipient_metadata').$type<Record<string, any>>(),
+    recipientMetadata:
+      jsonb('recipient_metadata').$type<Record<string, unknown>>(),
     subject: varchar('subject', { length: 500 }),
     body: text('body').notNull(),
     htmlBody: text('html_body'),
-    templateVariables: jsonb('template_variables').$type<Record<string, any>>(),
+    templateVariables:
+      jsonb('template_variables').$type<Record<string, unknown>>(),
     attachments: jsonb('attachments').$type<any[]>(),
     statusId: bigserial('status_id', { mode: 'number' })
       .references(() => lookups.id)
@@ -55,7 +57,7 @@ export const notifications = pgTable(
     failureReason: varchar('failure_reason', { length: 1000 }),
     retryCount: integer('retry_count').default(0).notNull(),
     bulkJobId: bigserial('bulk_job_id', { mode: 'number' }), // for CSV bulk jobs
-    metadata: jsonb('metadata').$type<Record<string, any>>(), // campaignId, source, etc
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(), // campaignId, source, etc
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),

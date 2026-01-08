@@ -148,7 +148,7 @@ import { defaultTemplates, defaultCategories } from '../../database/seeds/defaul
 **Error**:
 ```
 TS2769: No overload matches this call.
-Type 'null' is not assignable to type 'number | SQL<unknown> | Placeholder<string, any> | undefined'.
+Type 'null' is not assignable to type 'number | SQL<unknown> | Placeholder<string, unknown> | undefined'.
 ```
 
 **Location**: Multiple files (seed files, service files)

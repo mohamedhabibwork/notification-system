@@ -504,7 +504,7 @@ export const templateMetadata: TemplateMetadata[] = [
     filePath: 'marketing/engagement/welcome-series-1.hbs',
     channel: 'email',
     category: 'ENGAGEMENT',
-    subject: 'Welcome to {{companyName}} - Let\'s Get Started!',
+    subject: "Welcome to {{companyName}} - Let's Get Started!",
     variables: {
       firstName: 'string - User first name',
       step1Title: 'string - First step title',
@@ -602,7 +602,7 @@ export const templateMetadata: TemplateMetadata[] = [
     filePath: 'marketing/engagement/feedback-request.hbs',
     channel: 'email',
     category: 'ENGAGEMENT',
-    subject: 'We\'d Love Your Feedback',
+    subject: "We'd Love Your Feedback",
     variables: {
       firstName: 'string - User first name',
       surveyUrl: 'string - Survey URL',
@@ -745,7 +745,7 @@ export const templateMetadata: TemplateMetadata[] = [
     filePath: 'marketing/promotional/event-invitation.hbs',
     channel: 'email',
     category: 'PROMOTIONAL',
-    subject: 'You\'re Invited: {{eventName}}',
+    subject: "You're Invited: {{eventName}}",
     variables: {
       firstName: 'string - User first name',
       eventName: 'string - Event name',

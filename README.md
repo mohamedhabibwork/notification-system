@@ -49,10 +49,19 @@ The system uses a **flexible, extensible provider architecture** that allows eas
 4. **First Enabled** - First available enabled provider
 
 ### Supported Providers
+
+**14 Directly Implemented + 50+ via Apprise**
+
+- **Chat**: Discord, Slack, Microsoft Teams, Google Chat, Mattermost (+ others via Apprise)
+- **Messenger**: Telegram, Signal, LINE Messenger, LINE Notify
+- **Push**: Pushover, Gotify, Ntfy, Bark, Gorush, Pushbullet, Pushy, LunaSea
+- **Alert**: PagerDuty, Opsgenie, Alerta, Splunk, GoAlert, Squadcast, AlertNow, PagerTree
+- **Webhook**: Generic webhook support for any HTTP endpoint
+- **IoT**: Home Assistant, Nostr, OneBot
 - **Email**: SendGrid, AWS SES, Mailgun
-- **SMS**: Twilio, AWS SNS
-- **FCM**: Firebase, Apple APN
-- **WhatsApp**: WhatsApp Business API, WPPConnect (WhatsApp Web)
+- **SMS**: Twilio, AWS SNS, ClickSend SMS, Octopush, SMSEagle
+- **WhatsApp**: WhatsApp Business API, WPPConnect
+- **Aggregator**: Apprise (unified access to 50+ services)
 
 📖 See [PROVIDER_ARCHITECTURE.md](./PROVIDER_ARCHITECTURE.md) for detailed documentation on adding custom providers.
 
@@ -578,11 +587,44 @@ For detailed API documentation, visit: [https://wppconnect.io/](https://wppconne
 
 ## 📚 Documentation
 
+- **[PROVIDERS.md](docs/PROVIDERS.md)** - Complete provider documentation (42+ services)
 - **[MICROSERVICES_IMPLEMENTATION_SUMMARY.md](MICROSERVICES_IMPLEMENTATION_SUMMARY.md)** - Implementation details
 - **[TESTING_GUIDE.md](TESTING_GUIDE.md)** - Testing instructions  
 - **[KEYCLOAK_SETUP.md](KEYCLOAK_SETUP.md)** - Keycloak configuration
+- **[MONITORING.md](docs/MONITORING.md)** - Complete monitoring & observability guide
+- **[QUICK_START_MONITORING.md](docs/QUICK_START_MONITORING.md)** - Quick monitoring setup
 - **[notification_prd.md](notification_prd.md)** - Product requirements
 - **[notification_erd.md](notification_erd.md)** - Database schema
+
+## 📊 Monitoring & Observability
+
+The system provides comprehensive monitoring through Prometheus and Grafana:
+
+- **Metrics Endpoint**: `http://localhost:3000/metrics`
+- **Pre-built Dashboards**: Grafana dashboards for notifications, API performance, queues
+- **Alert Rules**: Pre-configured alerts for critical conditions
+- **Cloud Support**: Works with Grafana Cloud, AWS AMP/AMG, or self-hosted
+
+### Quick Setup
+
+**Local Development:**
+```bash
+cp env.development .env
+docker compose --profile monitoring up -d
+npm run start:dev
+# Access Grafana at http://localhost:3001 (admin/admin)
+```
+
+**Cloud (Production):**
+```bash
+cp env.docker .env
+# Edit .env with your Grafana Cloud credentials
+PROMETHEUS_REMOTE_WRITE_ENABLED=true
+PROMETHEUS_REMOTE_WRITE_URL=https://prometheus-prod-xx-xxx.grafana.net/api/prom/push
+GRAFANA_URL=https://yourname.grafana.net
+```
+
+See **[docs/QUICK_START_MONITORING.md](docs/QUICK_START_MONITORING.md)** for detailed setup instructions.
 
 ## 🤝 Contributing
 

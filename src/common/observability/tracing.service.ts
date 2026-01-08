@@ -47,7 +47,7 @@ export class TracingService implements OnModuleInit {
     // OpenTelemetry initialization would go here
     // Note: This requires the OpenTelemetry SDK to be properly configured
     // For now, we'll just log that it's ready to be initialized
-    
+
     // Example of what would be initialized:
     // - NodeSDK with auto-instrumentations
     // - JaegerExporter
@@ -55,27 +55,29 @@ export class TracingService implements OnModuleInit {
     // - Context propagation
     // - Span processors
 
-    this.logger.log('Tracing service ready (implementation pending full OpenTelemetry setup)');
+    this.logger.log(
+      'Tracing service ready (implementation pending full OpenTelemetry setup)',
+    );
   }
 
-  createSpan(name: string, attributes?: Record<string, any>): void {
+  createSpan(name: string, attributes?: Record<string, unknown>): void {
     if (!this.initialized) return;
-    
+
     // This would create a new span with OpenTelemetry
     // For now, just log
     this.logger.debug(`Span: ${name}`, attributes);
   }
 
-  addEvent(name: string, attributes?: Record<string, any>): void {
+  addEvent(name: string, attributes?: Record<string, unknown>): void {
     if (!this.initialized) return;
-    
+
     // This would add an event to the current span
     this.logger.debug(`Event: ${name}`, attributes);
   }
 
-  setAttributes(attributes: Record<string, any>): void {
+  setAttributes(attributes: Record<string, unknown>): void {
     if (!this.initialized) return;
-    
+
     // This would set attributes on the current span
     this.logger.debug('Attributes:', attributes);
   }

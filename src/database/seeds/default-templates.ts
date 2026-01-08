@@ -10,7 +10,7 @@ export interface DefaultTemplate {
   subject?: string;
   bodyTemplate: string;
   htmlTemplate?: string;
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   language: string;
   categoryCode?: string;
 }
@@ -180,7 +180,8 @@ The {{companyName}} Team`,
     name: 'SMS Verification Code',
     templateCode: 'SMS_VERIFICATION',
     channel: 'sms',
-    bodyTemplate: '{{companyName}}: Your verification code is {{code}}. Valid for {{expiryMinutes}} minutes.',
+    bodyTemplate:
+      '{{companyName}}: Your verification code is {{code}}. Valid for {{expiryMinutes}} minutes.',
     variables: {
       code: 'string',
       expiryMinutes: 'number',
@@ -259,7 +260,12 @@ The {{companyName}} Team`,
 ];
 
 export const defaultCategories = [
-  { name: 'Account Management', code: 'ACCOUNT', icon: 'user', color: '#2196F3' },
+  {
+    name: 'Account Management',
+    code: 'ACCOUNT',
+    icon: 'user',
+    color: '#2196F3',
+  },
   { name: 'Security', code: 'SECURITY', icon: 'lock', color: '#F44336' },
   { name: 'Alerts', code: 'ALERTS', icon: 'bell', color: '#FF9800' },
   { name: 'General', code: 'GENERAL', icon: 'info', color: '#9E9E9E' },

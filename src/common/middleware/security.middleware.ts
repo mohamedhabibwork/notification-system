@@ -3,10 +3,10 @@ import { Request, Response, NextFunction } from 'express';
 
 /**
  * Security Middleware (HTTP/REST only)
- * 
+ *
  * Adds security headers to HTTP responses.
  * This middleware is for HTTP/REST requests only.
- * 
+ *
  * Note: gRPC and GraphQL use their own security mechanisms
  */
 @Injectable()

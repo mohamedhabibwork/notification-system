@@ -1,6 +1,6 @@
 /**
  * Provider DTOs
- * 
+ *
  * Data Transfer Objects for provider CRUD operations.
  * Uses typed credentials from the provider interfaces for type safety.
  */

@@ -1,6 +1,6 @@
 /**
  * Twilio Provider Implementation
- * 
+ *
  * Concrete implementation of the SMS provider for Twilio.
  * Handles SMS sending through Twilio's API.
  */
@@ -20,16 +20,19 @@ export class TwilioProvider extends BaseProvider<TwilioCredentials> {
 
   constructor(credentials: TwilioCredentials) {
     super(credentials);
-    this.twilioClient = new Twilio(credentials.accountSid, credentials.authToken);
+    this.twilioClient = new Twilio(
+      credentials.accountSid,
+      credentials.authToken,
+    );
   }
-  
+
   async send(payload: ProviderSendPayload): Promise<ProviderSendResult> {
     try {
       this.logSendAttempt(payload);
-      
+
       const messageData = this.formatPayload(payload);
       const message = await this.twilioClient.messages.create(messageData);
-      
+
       const result: ProviderSendResult = {
         success: true,
         messageId: message.sid,
@@ -40,10 +43,9 @@ export class TwilioProvider extends BaseProvider<TwilioCredentials> {
           errorMessage: message.errorMessage,
         },
       };
-      
+
       this.logSendSuccess(result);
       return result;
-      
     } catch (error) {
       return {
         success: false,
@@ -52,22 +54,24 @@ export class TwilioProvider extends BaseProvider<TwilioCredentials> {
       };
     }
   }
-  
+
   async validate(): Promise<boolean> {
     if (!this.validateCredentials()) {
       return false;
     }
-    
+
     try {
       // Test credentials by fetching account info
       await this.twilioClient.api.accounts(this.credentials.accountSid).fetch();
       return true;
     } catch (error) {
-      this.logger.error(`Twilio validation failed: ${(error as Error).message}`);
+      this.logger.error(
+        `Twilio validation failed: ${(error as Error).message}`,
+      );
       return false;
     }
   }
-  
+
   protected formatPayload(payload: ProviderSendPayload): {
     to: string;
     from: string;
@@ -91,19 +95,19 @@ export class TwilioProvider extends BaseProvider<TwilioCredentials> {
 
     return messageData;
   }
-  
+
   getRequiredCredentials(): string[] {
     return ['accountSid', 'authToken', 'fromPhone'];
   }
-  
+
   getChannel(): ChannelType {
     return 'sms';
   }
-  
+
   getProviderName(): string {
     return 'twilio';
   }
-  
+
   getMetadata(): ProviderMetadata {
     return {
       displayName: 'Twilio',
@@ -116,7 +120,7 @@ export class TwilioProvider extends BaseProvider<TwilioCredentials> {
       },
     };
   }
-  
+
   protected extractErrorCode(error: Error): string {
     if ('code' in error) {
       return (error as { code: number }).code.toString();

@@ -2,7 +2,10 @@ import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ProviderRegistry } from './registry/provider.registry';
 import { ProvidersService } from '../../modules/providers/providers.service';
-import { IProvider, IProviderCredentials } from './interfaces/provider.interface';
+import {
+  IProvider,
+  IProviderCredentials,
+} from './interfaces/provider.interface';
 import { ChannelType, ProviderOptions } from './types';
 
 interface ProviderConfigFromEnv {
@@ -12,7 +15,7 @@ interface ProviderConfigFromEnv {
 
 /**
  * Provider Selector Service
- * 
+ *
  * Selects the appropriate provider for each notification channel based on:
  * 1. Request-specific provider override
  * 2. Tenant-specific provider configuration (from database)
@@ -32,7 +35,7 @@ export class ProviderSelectorService {
 
   /**
    * Get the provider instance to use for a channel
-   * 
+   *
    * @param channel - The notification channel (email, sms, fcm, whatsapp)
    * @param options - Optional overrides
    * @returns Provider instance ready to send notifications
@@ -51,8 +54,14 @@ export class ProviderSelectorService {
         this.logger.debug(
           `Using requested provider: ${options.requestedProvider} for ${channel}`,
         );
-        const credentials = this.buildCredentialsFromEnv(channel, options.requestedProvider);
-        return await this.registry.getProvider(options.requestedProvider, credentials);
+        const credentials = this.buildCredentialsFromEnv(
+          channel,
+          options.requestedProvider,
+        );
+        return await this.registry.getProvider(
+          options.requestedProvider,
+          credentials,
+        );
       }
       this.logger.warn(
         `Requested provider ${options.requestedProvider} is not enabled for ${channel}`,
@@ -82,14 +91,17 @@ export class ProviderSelectorService {
       this.logger.debug(
         `Using default provider: ${defaultProvider} for ${channel}`,
       );
-      const credentials = this.buildCredentialsFromEnv(channel, defaultProvider);
+      const credentials = this.buildCredentialsFromEnv(
+        channel,
+        defaultProvider,
+      );
       return await this.registry.getProvider(defaultProvider, credentials);
     }
 
     // 4. Get first enabled provider as fallback
     const fallbackProvider =
       options?.fallbackProvider || this.getFirstEnabledProvider(channel);
-    
+
     if (!fallbackProvider) {
       throw new Error(`No enabled provider found for channel: ${channel}`);
     }
@@ -107,7 +119,10 @@ export class ProviderSelectorService {
   private async getTenantProviderFromDatabase(
     channel: string,
     tenantId: number,
-  ): Promise<{ providerName: string; credentials: Record<string, unknown> } | null> {
+  ): Promise<{
+    providerName: string;
+    credentials: Record<string, unknown>;
+  } | null> {
     try {
       const providers = await this.providersService.findByChannelAndTenant(
         channel,
@@ -117,8 +132,8 @@ export class ProviderSelectorService {
 
       if (providers && providers.length > 0) {
         // Get primary provider or first active one
-        const provider = providers.find(p => p.isPrimary) || providers[0];
-        
+        const provider = providers.find((p) => p.isPrimary) || providers[0];
+
         // Type guard: when includeCredentials is true, we get ProviderWithCredentials
         if ('credentials' in provider) {
           return {
@@ -145,7 +160,7 @@ export class ProviderSelectorService {
     providerName: string,
   ): IProviderCredentials {
     const config = this.getProviderConfig(channel, providerName);
-    
+
     return {
       ...config,
       providerType: providerName,
@@ -158,7 +173,9 @@ export class ProviderSelectorService {
    * Get the default provider for a channel from configuration
    */
   getDefaultProvider(channel: ChannelType): string | null {
-    return this.configService.get<string>(`providers.defaults.${channel}`) || null;
+    return (
+      this.configService.get<string>(`providers.defaults.${channel}`) || null
+    );
   }
 
   /**
@@ -173,10 +190,9 @@ export class ProviderSelectorService {
    * Get the first enabled provider for a channel
    */
   getFirstEnabledProvider(channel: ChannelType): string | null {
-    const providers = this.configService.get<Record<string, ProviderConfigFromEnv>>(
-      `providers.${channel}`,
-      {},
-    );
+    const providers = this.configService.get<
+      Record<string, ProviderConfigFromEnv>
+    >(`providers.${channel}`, {});
 
     for (const [providerName, config] of Object.entries(providers)) {
       if (config?.enabled === true) {
@@ -191,10 +207,9 @@ export class ProviderSelectorService {
    * Get all enabled providers for a channel
    */
   getEnabledProviders(channel: ChannelType): string[] {
-    const providers = this.configService.get<Record<string, ProviderConfigFromEnv>>(
-      `providers.${channel}`,
-      {},
-    );
+    const providers = this.configService.get<
+      Record<string, ProviderConfigFromEnv>
+    >(`providers.${channel}`, {});
 
     return Object.entries(providers)
       .filter(([_, config]) => config?.enabled === true)
@@ -204,10 +219,15 @@ export class ProviderSelectorService {
   /**
    * Get provider configuration
    */
-  getProviderConfig(channel: ChannelType, providerName: string): Record<string, unknown> {
-    return this.configService.get<Record<string, unknown>>(
-      `providers.${channel}.${providerName}`,
-    ) || {};
+  getProviderConfig(
+    channel: ChannelType,
+    providerName: string,
+  ): Record<string, unknown> {
+    return (
+      this.configService.get<Record<string, unknown>>(
+        `providers.${channel}.${providerName}`,
+      ) || {}
+    );
   }
 
   /**

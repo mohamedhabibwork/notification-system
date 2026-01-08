@@ -27,10 +27,11 @@ export const notificationLogs = pgTable(
     eventType: varchar('event_type', { length: 50 }).notNull(), // queued, sent, delivered, failed
     providerName: varchar('provider_name', { length: 100 }),
     providerMessageId: varchar('provider_message_id', { length: 255 }),
-    providerResponse: jsonb('provider_response').$type<Record<string, any>>(),
+    providerResponse:
+      jsonb('provider_response').$type<Record<string, unknown>>(),
     statusCode: varchar('status_code', { length: 50 }),
     errorMessage: text('error_message'),
-    metadata: jsonb('metadata').$type<Record<string, any>>(),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),

@@ -21,10 +21,12 @@ export const notificationProviders = pgTable(
     tenantId: bigserial('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
-    channel: varchar('channel', { length: 50 }).notNull(), // email, sms, fcm, whatsapp
+    channel: varchar('channel', { length: 50 }).notNull(), // email, sms, fcm, whatsapp, database, chat, messenger, push, alert, webhook, iot
     providerName: varchar('provider_name', { length: 100 }).notNull(), // twilio, sendgrid, etc
-    credentials: jsonb('credentials').$type<Record<string, any>>().notNull(), // encrypted
-    configuration: jsonb('configuration').$type<Record<string, any>>(),
+    credentials: jsonb('credentials')
+      .$type<Record<string, unknown>>()
+      .notNull(), // encrypted
+    configuration: jsonb('configuration').$type<Record<string, unknown>>(),
     isPrimary: boolean('is_primary').default(false).notNull(),
     isActive: boolean('is_active').default(true).notNull(),
     priority: integer('priority').default(0).notNull(), // for fallback

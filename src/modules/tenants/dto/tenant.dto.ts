@@ -11,15 +11,22 @@ export class CreateTenantDto {
   @IsOptional()
   domain?: string;
 
-  @ApiPropertyOptional({ description: 'Is tenant active', example: true, default: true })
+  @ApiPropertyOptional({
+    description: 'Is tenant active',
+    example: true,
+    default: true,
+  })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ description: 'Tenant settings', example: { theme: 'dark', timezone: 'UTC' } })
+  @ApiPropertyOptional({
+    description: 'Tenant settings',
+    example: { theme: 'dark', timezone: 'UTC' },
+  })
   @IsObject()
   @IsOptional()
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export class UpdateTenantDto {
@@ -37,7 +44,7 @@ export class UpdateTenantDto {
 
   @IsObject()
   @IsOptional()
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export class TenantResponseDto {
@@ -46,7 +53,7 @@ export class TenantResponseDto {
   name: string;
   domain?: string;
   isActive: boolean;
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }

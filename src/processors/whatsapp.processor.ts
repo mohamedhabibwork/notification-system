@@ -1,6 +1,6 @@
 /**
  * WhatsApp Processor
- * 
+ *
  * Processes WhatsApp notification jobs from the queue.
  * Uses the Provider Selector to get the appropriate WhatsApp provider instance.
  * Supports WPPConnect and WhatsApp Business API providers.
@@ -86,11 +86,11 @@ export class WhatsAppProcessor extends BaseProcessor {
             metadata: result.metadata,
           },
         );
-        
+
         this.logger.log(
           `WhatsApp notification ${notificationId} sent successfully via ${provider.getProviderName()}`,
         );
-        
+
         return result;
       } else {
         throw new Error(result.error?.message || 'Send failed');

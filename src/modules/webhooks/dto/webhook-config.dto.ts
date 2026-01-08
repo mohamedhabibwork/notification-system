@@ -226,7 +226,7 @@ export class WebhookTestDto {
   })
   @IsObject()
   @IsOptional()
-  testPayload?: Record<string, any>;
+  testPayload?: Record<string, unknown>;
 }
 
 export class WebhookTestResponseDto {
@@ -254,5 +254,5 @@ export class WebhookEventDto {
   description: string;
 
   @ApiProperty({ description: 'Sample payload structure' })
-  samplePayload: Record<string, any>;
+  samplePayload: Record<string, unknown>;
 }

@@ -1,9 +1,9 @@
 /**
  * FCM Processor
- * 
+ *
  * Processes FCM (Firebase Cloud Messaging) notification jobs from the queue.
  * Uses the Provider Selector to get the appropriate FCM provider instance.
- * 
+ *
  * Note: FCM provider implementation is TODO - currently using fallback logic
  */
 
@@ -57,14 +57,9 @@ export class FcmProcessor extends BaseProcessor {
       );
 
       await this.updateNotificationStatus(notificationId, 'pending');
-      await this.logNotificationEvent(
-        notificationId,
-        tenantId,
-        'fcm_pending',
-        {
-          message: 'FCM provider implementation pending',
-        },
-      );
+      await this.logNotificationEvent(notificationId, tenantId, 'fcm_pending', {
+        message: 'FCM provider implementation pending',
+      });
 
       return { success: false, pending: true };
 
@@ -111,14 +106,9 @@ export class FcmProcessor extends BaseProcessor {
         'failed',
         (error as Error).message,
       );
-      await this.logNotificationEvent(
-        notificationId,
-        tenantId,
-        'fcm_failed',
-        {
-          error: (error as Error).message,
-        },
-      );
+      await this.logNotificationEvent(notificationId, tenantId, 'fcm_failed', {
+        error: (error as Error).message,
+      });
       throw error;
     }
   }

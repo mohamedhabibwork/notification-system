@@ -48,7 +48,7 @@ export class OrderCreatedEventDto extends BaseEventDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class OrderShippedEventDto extends BaseEventDto {
@@ -64,7 +64,7 @@ export class OrderShippedEventDto extends BaseEventDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class PaymentCompletedEventDto extends BaseEventDto {
@@ -83,7 +83,7 @@ export class PaymentCompletedEventDto extends BaseEventDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class PaymentFailedEventDto extends BaseEventDto {
@@ -98,7 +98,7 @@ export class PaymentFailedEventDto extends BaseEventDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class UserRegisteredEventDto extends BaseEventDto {
@@ -118,7 +118,7 @@ export class UserRegisteredEventDto extends BaseEventDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class UserPasswordResetEventDto extends BaseEventDto {
@@ -136,5 +136,5 @@ export class UserPasswordResetEventDto extends BaseEventDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

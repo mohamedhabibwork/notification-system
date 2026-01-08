@@ -11,7 +11,7 @@ import { KeycloakAuthGuard } from '../../modules/auth/guards/keycloak-auth.guard
 
 /**
  * Protocol-Aware Auth Guard
- * 
+ *
  * Handles authentication for different protocols:
  * - HTTP/REST: Uses Keycloak JWT from Authorization header
  * - GraphQL: Extracts context and validates JWT
@@ -53,7 +53,9 @@ export class ProtocolAwareAuthGuard implements CanActivate {
     }
   }
 
-  private handleHttp(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+  private handleHttp(
+    context: ExecutionContext,
+  ): boolean | Promise<boolean> | Observable<boolean> {
     // Use existing Keycloak guard for HTTP
     return this.httpAuthGuard.canActivate(context);
   }
@@ -70,7 +72,9 @@ export class ProtocolAwareAuthGuard implements CanActivate {
     // Extract JWT from Authorization header
     const authHeader = req.headers?.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      this.logger.warn('Missing or invalid Authorization header in GraphQL request');
+      this.logger.warn(
+        'Missing or invalid Authorization header in GraphQL request',
+      );
       return false;
     }
 

@@ -47,13 +47,13 @@ export class RetryService {
     for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
       try {
         const result = await operation();
-        
+
         if (attempt > 0) {
           this.logger.log(
             `${operationName} succeeded on attempt ${attempt + 1}/${finalConfig.maxRetries + 1}`,
           );
         }
-        
+
         return result;
       } catch (error) {
         lastError = error;

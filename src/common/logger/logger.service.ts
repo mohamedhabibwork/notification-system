@@ -105,12 +105,16 @@ export class CustomLoggerService implements LoggerService {
   logWithTenant(
     message: string,
     tenantId: number,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ) {
     this.logger.info(message, { ...metadata, tenantId, context: this.context });
   }
 
-  logWithUser(message: string, userId: string, metadata?: Record<string, any>) {
+  logWithUser(
+    message: string,
+    userId: string,
+    metadata?: Record<string, unknown>,
+  ) {
     this.logger.info(message, { ...metadata, userId, context: this.context });
   }
 }

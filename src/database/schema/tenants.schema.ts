@@ -14,7 +14,7 @@ export const tenants = pgTable('tenants', {
   name: varchar('name', { length: 255 }).notNull(),
   domain: varchar('domain', { length: 255 }).unique(),
   isActive: boolean('is_active').default(true).notNull(),
-  settings: jsonb('settings').$type<Record<string, any>>(),
+  settings: jsonb('settings').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

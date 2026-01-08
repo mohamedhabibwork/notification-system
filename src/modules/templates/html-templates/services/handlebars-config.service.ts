@@ -14,7 +14,7 @@ export class HandlebarsConfigService {
 
   private configureHandlebars(): void {
     // Configure to keep original {{variable}} for missing variables
-    this.handlebars.registerHelper('helperMissing', function() {
+    this.handlebars.registerHelper('helperMissing', function () {
       const options = arguments[arguments.length - 1];
       const name = options.name;
       return new Handlebars.SafeString(`{{${name}}}`);
@@ -26,20 +26,26 @@ export class HandlebarsConfigService {
 
   private registerHelpers(): void {
     // Date formatting helper
-    this.handlebars.registerHelper('formatDate', (date: Date | string, format: string) => {
-      if (!date) return '';
-      const d = new Date(date);
-      return d.toLocaleDateString();
-    });
+    this.handlebars.registerHelper(
+      'formatDate',
+      (date: Date | string, format: string) => {
+        if (!date) return '';
+        const d = new Date(date);
+        return d.toLocaleDateString();
+      },
+    );
 
     // Currency helper
-    this.handlebars.registerHelper('currency', (amount: number, currency = 'USD') => {
-      if (amount === undefined || amount === null) return '';
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency,
-      }).format(amount);
-    });
+    this.handlebars.registerHelper(
+      'currency',
+      (amount: number, currency = 'USD') => {
+        if (amount === undefined || amount === null) return '';
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency,
+        }).format(amount);
+      },
+    );
 
     // Uppercase helper
     this.handlebars.registerHelper('uppercase', (str: string) => {
@@ -52,9 +58,12 @@ export class HandlebarsConfigService {
     });
 
     // Default value helper
-    this.handlebars.registerHelper('default', (value: unknown, defaultValue: unknown) => {
-      return value !== undefined && value !== null ? value : defaultValue;
-    });
+    this.handlebars.registerHelper(
+      'default',
+      (value: unknown, defaultValue: unknown) => {
+        return value !== undefined && value !== null ? value : defaultValue;
+      },
+    );
 
     // Conditional equality helper
     this.handlebars.registerHelper('eq', (a: unknown, b: unknown) => {
@@ -73,7 +82,9 @@ export class HandlebarsConfigService {
       this.handlebars.registerPartial(name, content);
       this.logger.debug(`Registered partial: ${name}`);
     } catch (error) {
-      this.logger.error(`Failed to register partial ${name}: ${(error as Error).message}`);
+      this.logger.error(
+        `Failed to register partial ${name}: ${(error as Error).message}`,
+      );
     }
   }
 

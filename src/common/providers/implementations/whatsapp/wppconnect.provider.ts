@@ -1,9 +1,9 @@
 /**
  * WPPConnect Provider Implementation
- * 
+ *
  * Concrete implementation of the WhatsApp provider using WPPConnect.
  * Handles message sending through WhatsApp Web API.
- * 
+ *
  * Reference: https://wppconnect.io/docs/tutorial/basics/basic-functions
  */
 
@@ -27,7 +27,7 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
     sessionManager?: SessionManagerService,
   ) {
     super(credentials);
-    
+
     // Session manager will be injected by provider factory
     if (sessionManager) {
       this.sessionManager = sessionManager;
@@ -73,14 +73,17 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
       const formattedPayload = this.formatPayload(payload);
 
       // Detect message type and send accordingly
-      if (payload.options?.messageType === 'location' && payload.options?.location) {
+      if (
+        payload.options?.messageType === 'location' &&
+        payload.options?.location
+      ) {
         // Location message
         const location = payload.options.location as {
           latitude: number;
           longitude: number;
           name?: string;
         };
-        
+
         const result = await client.sendLocation(
           formattedPayload.phone,
           location.latitude.toString(),
@@ -88,27 +91,33 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
           location.name || 'Location',
         );
         messageId = result.id;
-      } else if (payload.options?.messageType === 'contact' && payload.options?.contact) {
+      } else if (
+        payload.options?.messageType === 'contact' &&
+        payload.options?.contact
+      ) {
         // Contact/vCard message
         const contact = payload.options.contact as {
           contactId: string;
           name: string;
         };
-        
+
         const result = await client.sendContactVcard(
           formattedPayload.phone,
           contact.contactId,
           contact.name,
         );
         messageId = result.id;
-      } else if (payload.options?.messageType === 'media' && payload.options?.media) {
+      } else if (
+        payload.options?.messageType === 'media' &&
+        payload.options?.media
+      ) {
         // Media message (image, video, document)
         const media = payload.options.media as {
           base64: string;
           filename: string;
           caption?: string;
         };
-        
+
         const result = await client.sendFileFromBase64(
           formattedPayload.phone,
           media.base64,
@@ -165,7 +174,9 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
       // Additional validation can be added here
       return true;
     } catch (error) {
-      this.logger.error(`WPPConnect validation failed: ${(error as Error).message}`);
+      this.logger.error(
+        `WPPConnect validation failed: ${(error as Error).message}`,
+      );
       return false;
     }
   }
@@ -245,7 +256,7 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
     if ('code' in error) {
       return (error as { code: string }).code;
     }
-    
+
     // Check for common WPPConnect errors
     const message = error.message.toLowerCase();
     if (message.includes('not connected')) {
@@ -257,7 +268,7 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
     } else if (message.includes('timeout')) {
       return 'TIMEOUT';
     }
-    
+
     return 'WPPCONNECT_ERROR';
   }
 
@@ -266,7 +277,7 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
    */
   protected isRetryableError(error: Error): boolean {
     const errorCode = this.extractErrorCode(error);
-    
+
     // Connection errors are retryable
     const retryableCodes = [
       'ECONNRESET',
@@ -275,7 +286,7 @@ export class WPPConnectProvider extends BaseProvider<WPPConnectCredentials> {
       'NOT_CONNECTED',
       'SESSION_ERROR',
     ];
-    
+
     return retryableCodes.includes(errorCode);
   }
 }

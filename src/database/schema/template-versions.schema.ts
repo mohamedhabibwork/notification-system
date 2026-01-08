@@ -21,7 +21,7 @@ export const templateVersions = pgTable('template_versions', {
   subject: varchar('subject', { length: 500 }),
   bodyTemplate: text('body_template').notNull(),
   htmlTemplate: text('html_template'),
-  variables: jsonb('variables').$type<Record<string, any>>(),
+  variables: jsonb('variables').$type<Record<string, unknown>>(),
   changeDescription: text('change_description'),
   changeType: varchar('change_type', { length: 50 }), // 'major', 'minor', 'patch'
   createdAt: timestamp('created_at', { withTimezone: true })

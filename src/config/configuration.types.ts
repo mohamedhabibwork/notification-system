@@ -1,6 +1,6 @@
 /**
  * Configuration Types
- * 
+ *
  * TypeScript interfaces for the entire application configuration.
  * Provides type safety for all configuration values.
  */

@@ -23,7 +23,7 @@ export const notificationPreferences = pgTable(
     userId: varchar('user_id', { length: 255 }).notNull(),
     channel: varchar('channel', { length: 50 }).notNull(),
     isEnabled: boolean('is_enabled').default(true).notNull(),
-    settings: jsonb('settings').$type<Record<string, any>>(), // quiet hours, frequency limits
+    settings: jsonb('settings').$type<Record<string, unknown>>(), // quiet hours, frequency limits
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),

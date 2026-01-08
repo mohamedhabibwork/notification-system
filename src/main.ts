@@ -211,7 +211,7 @@ async function bootstrap() {
   logger.log(`📚 GraphQL Playground: http://localhost:${port}/graphql`);
   logger.log(`🔗 Health check: http://localhost:${port}/health`);
   logger.log(`📊 Metrics: http://localhost:${port}/metrics`);
-  
+
   if (grpcEnabled) {
     logger.log(`🔌 gRPC endpoint: localhost:${grpcPort}`);
   }

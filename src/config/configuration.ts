@@ -1,6 +1,6 @@
 /**
  * Application Configuration
- * 
+ *
  * Central configuration for the entire notification system.
  * Loads values from environment variables with sensible defaults.
  */
@@ -133,22 +133,26 @@ export default (): AppConfiguration => ({
     email: {
       sendgrid: {
         apiKey: process.env.EMAIL_SENDGRID_API_KEY || '',
-        fromEmail: process.env.EMAIL_SENDGRID_FROM_EMAIL || 'noreply@notification.local',
-        fromName: process.env.EMAIL_SENDGRID_FROM_NAME || 'Notification Service',
+        fromEmail:
+          process.env.EMAIL_SENDGRID_FROM_EMAIL || 'noreply@notification.local',
+        fromName:
+          process.env.EMAIL_SENDGRID_FROM_NAME || 'Notification Service',
         enabled: process.env.EMAIL_SENDGRID_ENABLED !== 'false',
       },
       ses: {
         region: process.env.EMAIL_SES_REGION || 'us-east-1',
         accessKeyId: process.env.EMAIL_SES_ACCESS_KEY_ID || '',
         secretAccessKey: process.env.EMAIL_SES_SECRET_ACCESS_KEY || '',
-        fromEmail: process.env.EMAIL_SES_FROM_EMAIL || 'noreply@notification.local',
+        fromEmail:
+          process.env.EMAIL_SES_FROM_EMAIL || 'noreply@notification.local',
         fromName: process.env.EMAIL_SES_FROM_NAME || 'Notification Service',
         enabled: process.env.EMAIL_SES_ENABLED === 'true',
       },
       mailgun: {
         apiKey: process.env.EMAIL_MAILGUN_API_KEY || '',
         domain: process.env.EMAIL_MAILGUN_DOMAIN || '',
-        fromEmail: process.env.EMAIL_MAILGUN_FROM_EMAIL || 'noreply@notification.local',
+        fromEmail:
+          process.env.EMAIL_MAILGUN_FROM_EMAIL || 'noreply@notification.local',
         fromName: process.env.EMAIL_MAILGUN_FROM_NAME || 'Notification Service',
         enabled: process.env.EMAIL_MAILGUN_ENABLED === 'true',
       },
@@ -197,14 +201,24 @@ export default (): AppConfiguration => ({
         enabled: process.env.WHATSAPP_ENABLED !== 'false',
       },
       wppconnect: {
-        sessionName: process.env.WHATSAPP_WPPCONNECT_SESSION_NAME || 'notification-service',
+        sessionName:
+          process.env.WHATSAPP_WPPCONNECT_SESSION_NAME ||
+          'notification-service',
         phoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || '',
-        autoClose: parseInt(process.env.WHATSAPP_WPPCONNECT_AUTO_CLOSE || '60000', 10),
-        qrTimeout: parseInt(process.env.WHATSAPP_WPPCONNECT_QR_TIMEOUT || '60000', 10),
+        autoClose: parseInt(
+          process.env.WHATSAPP_WPPCONNECT_AUTO_CLOSE || '60000',
+          10,
+        ),
+        qrTimeout: parseInt(
+          process.env.WHATSAPP_WPPCONNECT_QR_TIMEOUT || '60000',
+          10,
+        ),
         useChrome: process.env.WHATSAPP_WPPCONNECT_USE_CHROME !== 'false',
-        disableWelcome: process.env.WHATSAPP_WPPCONNECT_DISABLE_WELCOME !== 'false',
+        disableWelcome:
+          process.env.WHATSAPP_WPPCONNECT_DISABLE_WELCOME !== 'false',
         tokenStore: process.env.WHATSAPP_WPPCONNECT_TOKEN_STORE || 'file',
-        folderNameToken: process.env.WHATSAPP_WPPCONNECT_TOKEN_FOLDER || './tokens/wppconnect',
+        folderNameToken:
+          process.env.WHATSAPP_WPPCONNECT_TOKEN_FOLDER || './tokens/wppconnect',
         enabled: process.env.WHATSAPP_WPPCONNECT_ENABLED === 'true',
       },
     },
@@ -238,7 +252,7 @@ export default (): AppConfiguration => ({
   seeding: {
     enabled: process.env.SEED_ENABLED === 'true',
     resetOnStart: process.env.SEED_RESET_ON_START === 'true',
-    
+
     // Control what gets seeded
     seedAdminUsers: process.env.SEED_ADMIN_USERS !== 'false',
     seedTestUsers: process.env.SEED_TEST_USERS !== 'false',

@@ -2,7 +2,18 @@
  * Common types for provider system
  */
 
-export type ChannelType = 'email' | 'sms' | 'fcm' | 'whatsapp' | 'database';
+export type ChannelType =
+  | 'email'
+  | 'sms'
+  | 'fcm'
+  | 'whatsapp'
+  | 'database'
+  | 'chat' // Discord, Slack, Teams, Google Chat, Mattermost, Rocket.Chat, Matrix, Kook, ZohoCliq, Stackfield
+  | 'messenger' // Telegram, Signal, LINE Messenger, LINE Notify
+  | 'push' // Pushover, Pushbullet, Pushy, Push by Techulus, Gorush, Gotify, Ntfy, Bark, LunaSea
+  | 'alert' // Alerta, AlertNow, GoAlert, Opsgenie, PagerDuty, PagerTree, Splunk, Squadcast
+  | 'webhook' // Generic webhooks
+  | 'iot'; // Home Assistant, Nostr, OneBot
 
 export interface ProviderOptions {
   requestedProvider?: string;

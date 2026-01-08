@@ -1,4 +1,8 @@
-import { Injectable, LoggerService as NestLoggerService, Scope } from '@nestjs/common';
+import {
+  Injectable,
+  LoggerService as NestLoggerService,
+  Scope,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as winston from 'winston';
 
@@ -17,16 +21,22 @@ export class ObservabilityLoggerService implements NestLoggerService {
         format: winston.format.combine(
           winston.format.timestamp(),
           winston.format.colorize(),
-          winston.format.printf(({ timestamp, level, message, context, ...meta }) => {
-            const metaStr = Object.keys(meta).length > 0 ? JSON.stringify(meta) : '';
-            return `${timestamp} [${context || 'Application'}] ${level}: ${message} ${metaStr}`;
-          }),
+          winston.format.printf(
+            ({ timestamp, level, message, context, ...meta }) => {
+              const metaStr =
+                Object.keys(meta).length > 0 ? JSON.stringify(meta) : '';
+              return `${timestamp} [${context || 'Application'}] ${level}: ${message} ${metaStr}`;
+            },
+          ),
         ),
       }),
     ];
 
     // Add ELK transport if enabled
-    const elkEnabled = this.configService.get<boolean>('OBSERVABILITY_ELK_ENABLED', false);
+    const elkEnabled = this.configService.get<boolean>(
+      'OBSERVABILITY_ELK_ENABLED',
+      false,
+    );
     if (elkEnabled) {
       try {
         // Note: winston-elasticsearch needs to be imported dynamically in production
@@ -50,7 +60,10 @@ export class ObservabilityLoggerService implements NestLoggerService {
         winston.format.json(),
       ),
       defaultMeta: {
-        service: this.configService.get<string>('SERVICE_NAME', 'notification-system'),
+        service: this.configService.get<string>(
+          'SERVICE_NAME',
+          'notification-system',
+        ),
         environment: this.configService.get<string>('NODE_ENV', 'development'),
       },
       transports,
@@ -82,7 +95,11 @@ export class ObservabilityLoggerService implements NestLoggerService {
   }
 
   // Custom method for structured logging
-  logStructured(level: string, message: string, metadata: Record<string, any>): void {
+  logStructured(
+    level: string,
+    message: string,
+    metadata: Record<string, unknown>,
+  ): void {
     this.logger.log(level, message, { ...metadata, context: this.context });
   }
 
@@ -91,7 +108,7 @@ export class ObservabilityLoggerService implements NestLoggerService {
     level: string,
     message: string,
     correlationId: string,
-    metadata?: Record<string, any>,
+    metadata?: Record<string, unknown>,
   ): void {
     this.logger.log(level, message, {
       ...metadata,

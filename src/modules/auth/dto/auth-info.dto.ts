@@ -20,7 +20,8 @@ export class UserAuthInfoDto {
   realm_roles?: string[];
 
   @ApiPropertyOptional({
-    description: 'Resource access roles (key-value pairs where key is resource name and value is array of role names)',
+    description:
+      'Resource access roles (key-value pairs where key is resource name and value is array of role names)',
     type: 'object',
     additionalProperties: true,
   })
@@ -47,7 +48,8 @@ export class ServiceAuthInfoDto {
   scope?: string;
 
   @ApiPropertyOptional({
-    description: 'Resource access roles (key-value pairs where key is resource name and value is array of role names)',
+    description:
+      'Resource access roles (key-value pairs where key is resource name and value is array of role names)',
     type: 'object',
     additionalProperties: true,
   })

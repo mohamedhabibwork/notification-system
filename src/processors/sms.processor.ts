@@ -1,6 +1,6 @@
 /**
  * SMS Processor
- * 
+ *
  * Processes SMS notification jobs from the queue.
  * Uses the Provider Selector to get the appropriate SMS provider instance.
  */
@@ -68,15 +68,10 @@ export class SmsProcessor extends BaseProcessor {
 
       if (result.success) {
         await this.updateNotificationStatus(notificationId, 'sent');
-        await this.logNotificationEvent(
-          notificationId,
-          tenantId,
-          'sms_sent',
-          {
-            provider: provider.getProviderName(),
-            messageId: result.messageId,
-          },
-        );
+        await this.logNotificationEvent(notificationId, tenantId, 'sms_sent', {
+          provider: provider.getProviderName(),
+          messageId: result.messageId,
+        });
         this.logger.log(
           `SMS notification ${notificationId} sent successfully via ${provider.getProviderName()}`,
         );
@@ -93,14 +88,9 @@ export class SmsProcessor extends BaseProcessor {
         'failed',
         (error as Error).message,
       );
-      await this.logNotificationEvent(
-        notificationId,
-        tenantId,
-        'sms_failed',
-        {
-          error: (error as Error).message,
-        },
-      );
+      await this.logNotificationEvent(notificationId, tenantId, 'sms_failed', {
+        error: (error as Error).message,
+      });
       throw error;
     }
   }

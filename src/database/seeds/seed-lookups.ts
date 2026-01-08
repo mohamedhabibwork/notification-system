@@ -14,7 +14,7 @@ export async function seedLookups(connectionString: string) {
     lookupCode: string;
     lookupValue: string;
     orderIndex: number;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }> = [
     // Notification statuses
     {
@@ -292,6 +292,295 @@ export async function seedLookups(connectionString: string) {
       lookupValue: 'Database Inbox',
       orderIndex: 1,
       metadata: { channel: 'database' },
+    },
+
+    // Chat Providers
+    {
+      type: 'chat_provider',
+      lookupCode: 'discord',
+      lookupValue: 'Discord',
+      orderIndex: 1,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'slack',
+      lookupValue: 'Slack',
+      orderIndex: 2,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'teams',
+      lookupValue: 'Microsoft Teams',
+      orderIndex: 3,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'GoogleChat',
+      lookupValue: 'Google Chat (Google Workspace)',
+      orderIndex: 4,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'mattermost',
+      lookupValue: 'Mattermost',
+      orderIndex: 5,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'rocket.chat',
+      lookupValue: 'Rocket.Chat',
+      orderIndex: 6,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'matrix',
+      lookupValue: 'Matrix',
+      orderIndex: 7,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'Kook',
+      lookupValue: 'Kook',
+      orderIndex: 8,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'ZohoCliq',
+      lookupValue: 'Zoho Cliq',
+      orderIndex: 9,
+      metadata: { channel: 'chat' },
+    },
+    {
+      type: 'chat_provider',
+      lookupCode: 'stackfield',
+      lookupValue: 'Stackfield',
+      orderIndex: 10,
+      metadata: { channel: 'chat' },
+    },
+
+    // Messenger Providers
+    {
+      type: 'messenger_provider',
+      lookupCode: 'telegram',
+      lookupValue: 'Telegram',
+      orderIndex: 1,
+      metadata: { channel: 'messenger' },
+    },
+    {
+      type: 'messenger_provider',
+      lookupCode: 'signal',
+      lookupValue: 'Signal',
+      orderIndex: 2,
+      metadata: { channel: 'messenger' },
+    },
+    {
+      type: 'messenger_provider',
+      lookupCode: 'line',
+      lookupValue: 'LINE Messenger',
+      orderIndex: 3,
+      metadata: { channel: 'messenger' },
+    },
+    {
+      type: 'messenger_provider',
+      lookupCode: 'LineNotify',
+      lookupValue: 'LINE Notify',
+      orderIndex: 4,
+      metadata: { channel: 'messenger' },
+    },
+
+    // Push Notification Providers
+    {
+      type: 'push_provider',
+      lookupCode: 'pushover',
+      lookupValue: 'Pushover',
+      orderIndex: 1,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'pushbullet',
+      lookupValue: 'Pushbullet',
+      orderIndex: 2,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'pushy',
+      lookupValue: 'Pushy',
+      orderIndex: 3,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'PushByTechulus',
+      lookupValue: 'Push by Techulus',
+      orderIndex: 4,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'gorush',
+      lookupValue: 'Gorush',
+      orderIndex: 5,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'gotify',
+      lookupValue: 'Gotify',
+      orderIndex: 6,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'ntfy',
+      lookupValue: 'Ntfy',
+      orderIndex: 7,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'Bark',
+      lookupValue: 'Bark',
+      orderIndex: 8,
+      metadata: { channel: 'push' },
+    },
+    {
+      type: 'push_provider',
+      lookupCode: 'lunasea',
+      lookupValue: 'LunaSea',
+      orderIndex: 9,
+      metadata: { channel: 'push' },
+    },
+
+    // Alert/Incident Management Providers
+    {
+      type: 'alert_provider',
+      lookupCode: 'alerta',
+      lookupValue: 'Alerta',
+      orderIndex: 1,
+      metadata: { channel: 'alert' },
+    },
+    {
+      type: 'alert_provider',
+      lookupCode: 'AlertNow',
+      lookupValue: 'AlertNow',
+      orderIndex: 2,
+      metadata: { channel: 'alert' },
+    },
+    {
+      type: 'alert_provider',
+      lookupCode: 'GoAlert',
+      lookupValue: 'GoAlert',
+      orderIndex: 3,
+      metadata: { channel: 'alert' },
+    },
+    {
+      type: 'alert_provider',
+      lookupCode: 'Opsgenie',
+      lookupValue: 'Opsgenie',
+      orderIndex: 4,
+      metadata: { channel: 'alert' },
+    },
+    {
+      type: 'alert_provider',
+      lookupCode: 'PagerDuty',
+      lookupValue: 'PagerDuty',
+      orderIndex: 5,
+      metadata: { channel: 'alert' },
+    },
+    {
+      type: 'alert_provider',
+      lookupCode: 'PagerTree',
+      lookupValue: 'PagerTree',
+      orderIndex: 6,
+      metadata: { channel: 'alert' },
+    },
+    {
+      type: 'alert_provider',
+      lookupCode: 'Splunk',
+      lookupValue: 'Splunk',
+      orderIndex: 7,
+      metadata: { channel: 'alert' },
+    },
+    {
+      type: 'alert_provider',
+      lookupCode: 'squadcast',
+      lookupValue: 'Squadcast',
+      orderIndex: 8,
+      metadata: { channel: 'alert' },
+    },
+
+    // Additional SMS Providers
+    {
+      type: 'sms_provider',
+      lookupCode: 'clicksendsms',
+      lookupValue: 'ClickSend SMS',
+      orderIndex: 3,
+      metadata: { channel: 'sms' },
+    },
+    {
+      type: 'sms_provider',
+      lookupCode: 'octopush',
+      lookupValue: 'Octopush',
+      orderIndex: 4,
+      metadata: { channel: 'sms' },
+    },
+    {
+      type: 'sms_provider',
+      lookupCode: 'SMSEagle',
+      lookupValue: 'SMSEagle',
+      orderIndex: 5,
+      metadata: { channel: 'sms' },
+    },
+
+    // Webhook Provider
+    {
+      type: 'webhook_provider',
+      lookupCode: 'webhook',
+      lookupValue: 'Webhook',
+      orderIndex: 1,
+      metadata: { channel: 'webhook' },
+    },
+
+    // IoT Providers
+    {
+      type: 'iot_provider',
+      lookupCode: 'HomeAssistant',
+      lookupValue: 'Home Assistant',
+      orderIndex: 1,
+      metadata: { channel: 'iot' },
+    },
+    {
+      type: 'iot_provider',
+      lookupCode: 'nostr',
+      lookupValue: 'Nostr',
+      orderIndex: 2,
+      metadata: { channel: 'iot' },
+    },
+    {
+      type: 'iot_provider',
+      lookupCode: 'OneBot',
+      lookupValue: 'OneBot',
+      orderIndex: 3,
+      metadata: { channel: 'iot' },
+    },
+
+    // Aggregator Provider
+    {
+      type: 'aggregator_provider',
+      lookupCode: 'apprise',
+      lookupValue: 'Apprise (Support 50+ Notification services)',
+      orderIndex: 1,
+      metadata: { channel: 'aggregator', supportsMultipleServices: true },
     },
   ];
 

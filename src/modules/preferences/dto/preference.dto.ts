@@ -27,7 +27,7 @@ export class CreatePreferenceDto {
 
   @IsObject()
   @IsOptional()
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export class UpdatePreferenceDto {
@@ -37,7 +37,7 @@ export class UpdatePreferenceDto {
 
   @IsObject()
   @IsOptional()
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export class BulkUpdatePreferencesDto {

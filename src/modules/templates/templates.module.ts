@@ -6,11 +6,7 @@ import { TemplateLoaderService } from './html-templates/services/template-loader
 
 @Module({
   controllers: [TemplatesController],
-  providers: [
-    TemplatesService,
-    HandlebarsConfigService,
-    TemplateLoaderService,
-  ],
+  providers: [TemplatesService, HandlebarsConfigService, TemplateLoaderService],
   exports: [TemplatesService, HandlebarsConfigService, TemplateLoaderService],
 })
 export class TemplatesModule {}

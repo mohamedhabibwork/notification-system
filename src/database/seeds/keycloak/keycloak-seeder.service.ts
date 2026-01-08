@@ -1,9 +1,9 @@
 /**
  * Keycloak Seeder Service
- * 
+ *
  * Encapsulates Keycloak admin operations for seeding users and service accounts.
  * Uses Keycloak Admin Client to manage realm, users, clients, and roles.
- * 
+ *
  * NOTE: This is a placeholder implementation. Full Keycloak integration requires:
  * 1. Install @keycloak/keycloak-admin-client
  * 2. Configure Keycloak connection
@@ -48,7 +48,7 @@ export interface KeycloakConfig {
 
 /**
  * Keycloak Seeder Service
- * 
+ *
  * TODO: Implement with @keycloak/keycloak-admin-client
  */
 export class KeycloakSeederService {
@@ -63,14 +63,14 @@ export class KeycloakSeederService {
    */
   async initialize(): Promise<void> {
     logger.log('Initializing Keycloak admin client...');
-    
+
     // TODO: Initialize Keycloak admin client
     // import KcAdminClient from '@keycloak/keycloak-admin-client';
     // this.kcAdminClient = new KcAdminClient({
     //   baseUrl: this.config.serverUrl,
     //   realmName: 'master',
     // });
-    
+
     // await this.kcAdminClient.auth({
     //   username: this.config.adminUsername,
     //   password: this.config.adminPassword,
@@ -86,7 +86,7 @@ export class KeycloakSeederService {
    */
   async createRealm(realmName: string): Promise<void> {
     logger.log(`Creating realm: ${realmName}`);
-    
+
     // TODO: Implement realm creation
     // const realms = await this.kcAdminClient.realms.find({ realm: realmName });
     // if (realms.length === 0) {
@@ -105,7 +105,7 @@ export class KeycloakSeederService {
    */
   async createUser(user: KeycloakUser): Promise<string> {
     logger.log(`Creating user: ${user.email}`);
-    
+
     // TODO: Implement user creation
     // await this.kcAdminClient.users.create({
     //   realm: this.config.realm,
@@ -126,9 +126,11 @@ export class KeycloakSeederService {
   /**
    * Create service account (OAuth2 client)
    */
-  async createServiceAccount(serviceAccount: KeycloakServiceAccount): Promise<void> {
+  async createServiceAccount(
+    serviceAccount: KeycloakServiceAccount,
+  ): Promise<void> {
     logger.log(`Creating service account: ${serviceAccount.clientId}`);
-    
+
     // TODO: Implement service account creation
     // await this.kcAdminClient.clients.create({
     //   realm: this.config.realm,
@@ -141,7 +143,9 @@ export class KeycloakSeederService {
     //   directAccessGrantsEnabled: serviceAccount.directAccessGrantsEnabled,
     // });
 
-    logger.log(`Service account ${serviceAccount.clientId} created (placeholder)`);
+    logger.log(
+      `Service account ${serviceAccount.clientId} created (placeholder)`,
+    );
   }
 
   /**
@@ -149,7 +153,7 @@ export class KeycloakSeederService {
    */
   async assignRoles(userId: string, roles: string[]): Promise<void> {
     logger.log(`Assigning roles to user ${userId}: ${roles.join(', ')}`);
-    
+
     // TODO: Implement role assignment
     // const realmRoles = await this.kcAdminClient.roles.find({ realm: this.config.realm });
     // const rolesToAssign = realmRoles.filter(r => roles.includes(r.name!));
@@ -167,7 +171,7 @@ export class KeycloakSeederService {
    */
   async assignTenantMapping(userId: string, tenantId: number): Promise<void> {
     logger.log(`Mapping user ${userId} to tenant ${tenantId}`);
-    
+
     // TODO: Implement tenant mapping
     // await this.kcAdminClient.users.update(
     //   { realm: this.config.realm, id: userId },
@@ -187,16 +191,16 @@ export class KeycloakSeederService {
  */
 export async function seedKeycloak(config: KeycloakConfig): Promise<void> {
   logger.log('Starting Keycloak seeding...');
-  
+
   const seeder = new KeycloakSeederService(config);
   await seeder.initialize();
-  
+
   // Create realm
   await seeder.createRealm(config.realm);
-  
+
   // TODO: Create users
   // TODO: Create service accounts
   // TODO: Assign roles
-  
+
   logger.log('Keycloak seeding complete (placeholder)');
 }

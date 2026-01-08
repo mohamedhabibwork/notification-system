@@ -5,7 +5,7 @@ export interface UserResponseDto {
   firstName?: string;
   lastName?: string;
   userType?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   preferences?: {
     emailEnabled?: boolean;
     smsEnabled?: boolean;
@@ -16,7 +16,7 @@ export interface UserResponseDto {
 export interface UserSearchDto {
   userIds?: string[];
   userTypes?: string[];
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 export interface UserPreferencesDto {

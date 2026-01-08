@@ -26,7 +26,7 @@ export const bulkNotificationItems = pgTable(
       () => notifications.id,
     ),
     rowNumber: integer('row_number').notNull(),
-    csvData: jsonb('csv_data').$type<Record<string, any>>(),
+    csvData: jsonb('csv_data').$type<Record<string, unknown>>(),
     status: varchar('status', { length: 50 }).notNull(), // pending, processed, failed
     errorMessage: text('error_message'),
     processedAt: timestamp('processed_at', { withTimezone: true }),

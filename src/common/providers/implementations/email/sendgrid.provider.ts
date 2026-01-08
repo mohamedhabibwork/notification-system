@@ -1,6 +1,6 @@
 /**
  * SendGrid Provider Implementation
- * 
+ *
  * Concrete implementation of the email provider for SendGrid.
  * Handles email sending through SendGrid's API.
  */
@@ -20,14 +20,14 @@ export class SendGridProvider extends BaseProvider<SendGridCredentials> {
     super(credentials);
     sgMail.setApiKey(credentials.apiKey);
   }
-  
+
   async send(payload: ProviderSendPayload): Promise<ProviderSendResult> {
     try {
       this.logSendAttempt(payload);
-      
+
       const msg = this.formatPayload(payload);
       const [response] = await sgMail.send(msg);
-      
+
       const result: ProviderSendResult = {
         success: true,
         messageId: response.headers['x-message-id'] as string,
@@ -37,10 +37,9 @@ export class SendGridProvider extends BaseProvider<SendGridCredentials> {
           headers: response.headers,
         },
       };
-      
+
       this.logSendSuccess(result);
       return result;
-      
     } catch (error) {
       return {
         success: false,
@@ -49,24 +48,28 @@ export class SendGridProvider extends BaseProvider<SendGridCredentials> {
       };
     }
   }
-  
+
   async validate(): Promise<boolean> {
     if (!this.validateCredentials()) {
       return false;
     }
-    
+
     try {
       // Test API key validity
       sgMail.setApiKey(this.credentials.apiKey);
       // Could make a test API call here
       return true;
     } catch (error) {
-      this.logger.error(`SendGrid validation failed: ${(error as Error).message}`);
+      this.logger.error(
+        `SendGrid validation failed: ${(error as Error).message}`,
+      );
       return false;
     }
   }
-  
-  protected formatPayload(payload: ProviderSendPayload): sgMail.MailDataRequired {
+
+  protected formatPayload(
+    payload: ProviderSendPayload,
+  ): sgMail.MailDataRequired {
     return {
       to: payload.recipient.email!,
       from: {
@@ -83,19 +86,19 @@ export class SendGridProvider extends BaseProvider<SendGridCredentials> {
       categories: this.credentials.categories,
     };
   }
-  
+
   getRequiredCredentials(): string[] {
     return ['apiKey', 'fromEmail', 'fromName'];
   }
-  
+
   getChannel(): ChannelType {
     return 'email';
   }
-  
+
   getProviderName(): string {
     return 'sendgrid';
   }
-  
+
   getMetadata(): ProviderMetadata {
     return {
       displayName: 'SendGrid',
@@ -108,7 +111,7 @@ export class SendGridProvider extends BaseProvider<SendGridCredentials> {
       },
     };
   }
-  
+
   protected extractErrorCode(error: Error): string {
     if ('code' in error) {
       return (error as { code: number }).code.toString();

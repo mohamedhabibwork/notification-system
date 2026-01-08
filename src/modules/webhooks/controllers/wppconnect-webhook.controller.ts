@@ -1,8 +1,8 @@
 /**
  * WPPConnect Webhook Controller
- * 
+ *
  * Handles QR code retrieval, session management, and status updates for WPPConnect.
- * 
+ *
  * Reference: https://wppconnect.io/docs/tutorial/basics/receiving-messages
  */
 

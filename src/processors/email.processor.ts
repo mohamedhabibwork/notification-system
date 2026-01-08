@@ -1,6 +1,6 @@
 /**
  * Email Processor
- * 
+ *
  * Processes email notification jobs from the queue.
  * Uses the Provider Selector to get the appropriate email provider instance.
  */

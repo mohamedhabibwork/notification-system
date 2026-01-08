@@ -60,7 +60,7 @@ export class BulkheadService {
     } finally {
       pool.running--;
       this.processQueue(pool);
-      
+
       this.logger.debug(
         `Bulkhead ${poolName}: ${pool.running}/${pool.maxConcurrent} slots now in use (released)`,
       );
@@ -93,10 +93,12 @@ export class BulkheadService {
   private waitForSlot(pool: BulkheadPool): Promise<void> {
     return new Promise((resolve, reject) => {
       const timestamp = Date.now();
-      
+
       // Add timeout to prevent indefinite waiting
       const timeoutId = setTimeout(() => {
-        const index = pool.queue.findIndex(item => item.timestamp === timestamp);
+        const index = pool.queue.findIndex(
+          (item) => item.timestamp === timestamp,
+        );
         if (index !== -1) {
           pool.queue.splice(index, 1);
           reject(
@@ -114,7 +116,9 @@ export class BulkheadService {
         },
         reject: () => {
           clearTimeout(timeoutId);
-          reject(new Error(`Bulkhead ${pool.name}: Request rejected from queue`));
+          reject(
+            new Error(`Bulkhead ${pool.name}: Request rejected from queue`),
+          );
         },
         timestamp,
       });
@@ -147,8 +151,8 @@ export class BulkheadService {
     };
   }
 
-  getAllPoolStats(): Record<string, any> {
-    const stats: Record<string, any> = {};
+  getAllPoolStats(): Record<string, unknown> {
+    const stats: Record<string, unknown> = {};
     this.pools.forEach((pool, name) => {
       stats[name] = {
         running: pool.running,

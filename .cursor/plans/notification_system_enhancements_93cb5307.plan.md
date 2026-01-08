@@ -1733,7 +1733,7 @@ import { eq } from 'drizzle-orm';
 
 @Injectable()
 export class ConfigService {
-  private configCache = new Map<string, any>();
+  private configCache = new Map<string, unknown>();
 
   constructor(@Inject(DRIZZLE_ORM) private readonly db: DrizzleDB) {}
 

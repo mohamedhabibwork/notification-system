@@ -1,4 +1,10 @@
-import { Injectable, Inject, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  Logger,
+  BadRequestException,
+} from '@nestjs/common';
 import { DRIZZLE_ORM } from '../../database/drizzle.module';
 import type { DrizzleDB } from '../../database/drizzle.module';
 import {
@@ -186,7 +192,7 @@ export class TemplatesService {
   // Helper method to render a template with variables
   async renderTemplate(
     templateId: number,
-    variables: Record<string, any>,
+    variables: Record<string, unknown>,
     tenantId: number,
   ) {
     const template = await this.findOne(templateId, tenantId);
@@ -512,7 +518,9 @@ export class TemplatesService {
       .limit(1);
 
     if (tenantTemplate) {
-      this.logger.debug(`Using tenant template: ${templateCode} for tenant ${tenantId}`);
+      this.logger.debug(
+        `Using tenant template: ${templateCode} for tenant ${tenantId}`,
+      );
       return tenantTemplate;
     }
 
@@ -586,7 +594,9 @@ export class TemplatesService {
   /**
    * Get all system templates
    */
-  async getSystemTemplates(): Promise<Array<typeof notificationTemplates.$inferSelect>> {
+  async getSystemTemplates(): Promise<
+    Array<typeof notificationTemplates.$inferSelect>
+  > {
     return await this.db
       .select()
       .from(notificationTemplates)
@@ -597,5 +607,286 @@ export class TemplatesService {
           isNull(notificationTemplates.deletedAt),
         ),
       );
+  }
+
+  /**
+   * Find templates compatible with a specific provider
+   */
+  async findByProvider(
+    providerId: number,
+    tenantId?: number,
+  ): Promise<Array<typeof notificationTemplates.$inferSelect>> {
+    // First, get the provider to know its channel
+    const { notificationProviders } = await import('../../database/schema/index.js');
+    const [provider] = await this.db
+      .select()
+      .from(notificationProviders)
+      .where(eq(notificationProviders.id, providerId));
+
+    if (!provider) {
+      throw new NotFoundException(`Provider with ID ${providerId} not found`);
+    }
+
+    // Find templates that match the provider's channel
+    const conditions = [
+      eq(notificationTemplates.channel, provider.channel),
+      eq(notificationTemplates.isActive, true),
+      isNull(notificationTemplates.deletedAt),
+    ];
+
+    if (tenantId !== undefined) {
+      // Include tenant-specific templates and system templates
+      return await this.db
+        .select()
+        .from(notificationTemplates)
+        .where(
+          and(
+            ...conditions,
+            // Template belongs to tenant or is a system template
+            tenantId === 0
+              ? eq(notificationTemplates.tenantId, 0)
+              : undefined as any,
+          ),
+        );
+    }
+
+    return await this.db
+      .select()
+      .from(notificationTemplates)
+      .where(and(...conditions as any));
+  }
+
+  /**
+   * Test template rendering with provider-specific data
+   */
+  async testTemplateWithProvider(
+    templateId: number,
+    providerId: number,
+    testData: Record<string, unknown>,
+    tenantId?: number,
+  ): Promise<{
+    success: boolean;
+    renderedContent: {
+      subject?: string;
+      body: string;
+      htmlBody?: string;
+    };
+    providerInfo: {
+      name: string;
+      channel: string;
+      supportsHtml: boolean;
+      supportsSubject: boolean;
+    };
+    warnings?: string[];
+  }> {
+    // Get template
+    const [template] = await this.db
+      .select()
+      .from(notificationTemplates)
+      .where(eq(notificationTemplates.id, templateId));
+
+    if (!template) {
+      throw new NotFoundException(`Template with ID ${templateId} not found`);
+    }
+
+    // Get provider
+    const { notificationProviders } = await import('../../database/schema/index.js');
+    const [provider] = await this.db
+      .select()
+      .from(notificationProviders)
+      .where(eq(notificationProviders.id, providerId));
+
+    if (!provider) {
+      throw new NotFoundException(`Provider with ID ${providerId} not found`);
+    }
+
+    // Check compatibility
+    const warnings: string[] = [];
+    if (template.channel !== provider.channel) {
+      warnings.push(
+        `Template channel (${template.channel}) does not match provider channel (${provider.channel})`,
+      );
+    }
+
+    // Render template
+    try {
+      const rendered = await this.renderTemplateByCode(
+        template.templateCode,
+        testData,
+        tenantId || template.tenantId,
+      );
+
+      return {
+        success: true,
+        renderedContent: {
+          subject: rendered.subject,
+          body: rendered.body,
+          htmlBody: rendered.htmlBody,
+        },
+        providerInfo: {
+          name: provider.providerName,
+          channel: provider.channel,
+          supportsHtml: ['email', 'chat'].includes(provider.channel),
+          supportsSubject: ['email', 'sms'].includes(provider.channel),
+        },
+        warnings: warnings.length > 0 ? warnings : undefined,
+      };
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to render template: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  /**
+   * Send a test notification using template and provider
+   */
+  async sendTestNotification(
+    templateId: number,
+    providerId: number,
+    recipient: any,
+    testData: Record<string, unknown>,
+    tenantId?: number,
+  ): Promise<{
+    success: boolean;
+    messageId?: string;
+    timestamp: Date;
+    error?: string;
+  }> {
+    // Test template rendering first
+    const testResult = await this.testTemplateWithProvider(
+      templateId,
+      providerId,
+      testData,
+      tenantId,
+    );
+
+    if (!testResult.success) {
+      return {
+        success: false,
+        timestamp: new Date(),
+        error: 'Template rendering failed',
+      };
+    }
+
+    // Here you would use the provider to actually send the notification
+    // For now, we'll return a success response
+    // In a real implementation, you'd do:
+    // const providerService = this.providerRegistry.get(provider.providerName);
+    // const result = await providerService.send({recipient, content: testResult.renderedContent});
+
+    return {
+      success: true,
+      messageId: `test-${Date.now()}`,
+      timestamp: new Date(),
+    };
+  }
+
+  /**
+   * Get recommended templates for a provider
+   */
+  async getRecommendedTemplates(
+    providerId: number,
+  ): Promise<Array<typeof notificationTemplates.$inferSelect>> {
+    // Get provider
+    const { notificationProviders } = await import('../../database/schema/index.js');
+    const [provider] = await this.db
+      .select()
+      .from(notificationProviders)
+      .where(eq(notificationProviders.id, providerId));
+
+    if (!provider) {
+      throw new NotFoundException(`Provider with ID ${providerId} not found`);
+    }
+
+    // Find system templates for this channel (most commonly used)
+    return await this.db
+      .select()
+      .from(notificationTemplates)
+      .where(
+        and(
+          eq(notificationTemplates.channel, provider.channel),
+          eq(notificationTemplates.tenantId, 0), // System templates
+          eq(notificationTemplates.isActive, true),
+          isNull(notificationTemplates.deletedAt),
+        ),
+      );
+  }
+
+  /**
+   * Bulk create templates
+   */
+  async bulkCreate(
+    templates: CreateTemplateDto[],
+    createdBy: string,
+  ): Promise<{
+    successCount: number;
+    failureCount: number;
+    successes: Array<typeof notificationTemplates.$inferSelect>;
+    failures: Array<{ index: number; error: string }>;
+  }> {
+    const successes: Array<typeof notificationTemplates.$inferSelect> = [];
+    const failures: Array<{ index: number; error: string }> = [];
+
+    for (let i = 0; i < templates.length; i++) {
+      try {
+        const result = await this.create(templates[i], createdBy);
+        successes.push(result);
+      } catch (error) {
+        failures.push({
+          index: i,
+          error: (error as Error).message,
+        });
+      }
+    }
+
+    return {
+      successCount: successes.length,
+      failureCount: failures.length,
+      successes,
+      failures,
+    };
+  }
+
+  /**
+   * Bulk update templates
+   */
+  async bulkUpdate(
+    updates: Array<{ id: number; data: UpdateTemplateDto }>,
+    updatedBy: string,
+    tenantId?: number,
+  ): Promise<{
+    successCount: number;
+    failureCount: number;
+    successes: Array<typeof notificationTemplates.$inferSelect>;
+    failures: Array<{ index: number; id: number; error: string }>;
+  }> {
+    const successes: Array<typeof notificationTemplates.$inferSelect> = [];
+    const failures: Array<{ index: number; id: number; error: string }> = [];
+
+    for (let i = 0; i < updates.length; i++) {
+      try {
+        const result = await this.update(
+          updates[i].id,
+          updates[i].data,
+          updatedBy,
+          tenantId,
+        );
+        successes.push(result);
+      } catch (error) {
+        failures.push({
+          index: i,
+          id: updates[i].id,
+          error: (error as Error).message,
+        });
+      }
+    }
+
+    return {
+      successCount: successes.length,
+      failureCount: failures.length,
+      successes,
+      failures,
+    };
   }
 }

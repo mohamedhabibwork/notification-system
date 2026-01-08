@@ -1,6 +1,6 @@
 /**
  * User Seeding Data
- * 
+ *
  * Define admin users, test users, and their configurations here.
  * This file is used by the seeding process.
  */
@@ -119,7 +119,7 @@ export interface SeedTenant {
   name: string;
   domain: string;
   isActive: boolean;
-  settings?: Record<string, any>;
+  settings?: Record<string, unknown>;
 }
 
 export const defaultTenants: SeedTenant[] = [

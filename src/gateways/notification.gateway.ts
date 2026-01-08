@@ -57,7 +57,7 @@ export class NotificationGateway
       const jwksUri = this.configService.get<string>('keycloak.jwksUri');
       // In production, you would verify against JWKS
       // For now, we'll decode without verification (development only)
-      const decoded = this.jwtService.decode(token) as any;
+      const decoded = this.jwtService.decode(token);
 
       if (!decoded || !decoded.sub) {
         this.logger.warn(

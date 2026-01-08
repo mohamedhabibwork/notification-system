@@ -19,7 +19,7 @@ export const featureFlags = pgTable('feature_flags', {
   tenantId: bigserial('tenant_id', { mode: 'number' }).references(
     () => tenants.id,
   ),
-  configuration: jsonb('configuration').$type<Record<string, any>>(),
+  configuration: jsonb('configuration').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

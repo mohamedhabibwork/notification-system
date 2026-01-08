@@ -54,6 +54,34 @@ export async function seedLookupTypes(connectionString: string) {
       typeName: 'database_provider',
       description: 'Available database notification provider implementations',
     },
+    {
+      typeName: 'chat_provider',
+      description: 'Available chat/collaboration platform providers',
+    },
+    {
+      typeName: 'messenger_provider',
+      description: 'Available instant messenger providers',
+    },
+    {
+      typeName: 'push_provider',
+      description: 'Available push notification providers',
+    },
+    {
+      typeName: 'alert_provider',
+      description: 'Available incident/alert management providers',
+    },
+    {
+      typeName: 'webhook_provider',
+      description: 'Generic webhook providers',
+    },
+    {
+      typeName: 'iot_provider',
+      description: 'IoT and smart home providers',
+    },
+    {
+      typeName: 'aggregator_provider',
+      description: 'Multi-service aggregator providers',
+    },
   ];
 
   let created = 0;

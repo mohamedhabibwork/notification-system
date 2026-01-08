@@ -37,8 +37,10 @@ export const notificationTemplates = pgTable(
     subject: varchar('subject', { length: 500 }),
     bodyTemplate: text('body_template').notNull(),
     htmlTemplate: text('html_template'),
-    variables: jsonb('variables').$type<Record<string, any>>(),
-    tags: jsonb('tags').$type<string[]>().default(sql`'[]'`),
+    variables: jsonb('variables').$type<Record<string, unknown>>(),
+    tags: jsonb('tags')
+      .$type<string[]>()
+      .default(sql`'[]'`),
     language: varchar('language', { length: 10 }).default('en'),
     version: integer('version').default(1).notNull(),
     isActive: boolean('is_active').default(true).notNull(),

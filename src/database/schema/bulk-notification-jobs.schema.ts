@@ -29,7 +29,7 @@ export const bulkNotificationJobs = pgTable(
     successCount: integer('success_count').default(0).notNull(),
     failedCount: integer('failed_count').default(0).notNull(),
     status: varchar('status', { length: 50 }).notNull(), // pending, processing, completed, failed
-    configuration: jsonb('configuration').$type<Record<string, any>>(), // channel, template, etc
+    configuration: jsonb('configuration').$type<Record<string, unknown>>(), // channel, template, etc
     startedAt: timestamp('started_at', { withTimezone: true }),
     completedAt: timestamp('completed_at', { withTimezone: true }),
     errorMessage: text('error_message'),

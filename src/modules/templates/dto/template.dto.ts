@@ -24,7 +24,10 @@ export class CreateTemplateDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: 'Unique template code', example: 'WELCOME_EMAIL' })
+  @ApiProperty({
+    description: 'Unique template code',
+    example: 'WELCOME_EMAIL',
+  })
   @IsString()
   templateCode: string;
 
@@ -33,35 +36,59 @@ export class CreateTemplateDto {
   @IsOptional()
   templateTypeId?: number;
 
-  @ApiProperty({ description: 'Notification channel', enum: TemplateChannel, example: TemplateChannel.EMAIL })
+  @ApiProperty({
+    description: 'Notification channel',
+    enum: TemplateChannel,
+    example: TemplateChannel.EMAIL,
+  })
   @IsEnum(TemplateChannel)
   channel: TemplateChannel;
 
-  @ApiPropertyOptional({ description: 'Email subject', example: 'Welcome to {{companyName}}!' })
+  @ApiPropertyOptional({
+    description: 'Email subject',
+    example: 'Welcome to {{companyName}}!',
+  })
   @IsString()
   @IsOptional()
   subject?: string;
 
-  @ApiProperty({ description: 'Template body with Handlebars syntax', example: 'Hello {{name}}, welcome!' })
+  @ApiProperty({
+    description: 'Template body with Handlebars syntax',
+    example: 'Hello {{name}}, welcome!',
+  })
   @IsString()
   bodyTemplate: string;
 
-  @ApiPropertyOptional({ description: 'HTML template body', example: '<h1>Hello {{name}}</h1>' })
+  @ApiPropertyOptional({
+    description: 'HTML template body',
+    example: '<h1>Hello {{name}}</h1>',
+  })
   @IsString()
   @IsOptional()
   htmlTemplate?: string;
 
-  @ApiPropertyOptional({ description: 'Template variables', example: { name: 'string', email: 'string' } })
+  @ApiPropertyOptional({
+    description: 'Template variables',
+    example: { name: 'string', email: 'string' },
+  })
   @IsObject()
   @IsOptional()
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
 
-  @ApiPropertyOptional({ description: 'Language code', example: 'en', default: 'en' })
+  @ApiPropertyOptional({
+    description: 'Language code',
+    example: 'en',
+    default: 'en',
+  })
   @IsString()
   @IsOptional()
   language?: string;
 
-  @ApiPropertyOptional({ description: 'Is template active', example: true, default: true })
+  @ApiPropertyOptional({
+    description: 'Is template active',
+    example: true,
+    default: true,
+  })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
@@ -86,7 +113,7 @@ export class UpdateTemplateDto {
 
   @IsObject()
   @IsOptional()
-  variables?: Record<string, any>;
+  variables?: Record<string, unknown>;
 
   @IsBoolean()
   @IsOptional()
@@ -95,5 +122,5 @@ export class UpdateTemplateDto {
 
 export class TemplatePreviewDto {
   @IsObject()
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
 }

@@ -66,7 +66,7 @@ export class RecipientDto {
   })
   @IsObject()
   @IsOptional()
-  recipientMetadata?: Record<string, any>;
+  recipientMetadata?: Record<string, unknown>;
 }
 
 export class DirectContentDto {
@@ -149,7 +149,7 @@ export class SendNotificationDto {
   })
   @IsObject()
   @IsOptional()
-  templateVariables?: Record<string, any>;
+  templateVariables?: Record<string, unknown>;
 
   @ApiPropertyOptional({
     description: 'Direct content (alternative to using a template)',
@@ -184,7 +184,7 @@ export class SendNotificationDto {
   })
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class SendBatchDto {

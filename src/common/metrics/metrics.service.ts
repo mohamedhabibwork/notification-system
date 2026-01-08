@@ -110,7 +110,7 @@ export class MetricsService {
 
   // Get all metrics as JSON
   getAllMetrics() {
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
 
     for (const [name, entries] of this.metrics.entries()) {
       result[name] = entries.map((e) => ({

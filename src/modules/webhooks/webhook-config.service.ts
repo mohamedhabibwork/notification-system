@@ -39,9 +39,7 @@ export class WebhookConfigService {
     // Encrypt webhook secret if provided
     let encryptedSecret: string | undefined;
     if (createDto.webhookSecret) {
-      encryptedSecret = this.encryptionService.encrypt(
-        createDto.webhookSecret,
-      );
+      encryptedSecret = this.encryptionService.encrypt(createDto.webhookSecret);
     } else {
       // Generate a secure random secret
       const generatedSecret = this.generateWebhookSecret();
@@ -140,9 +138,7 @@ export class WebhookConfigService {
     // Encrypt new secret if provided
     let encryptedSecret: string | undefined;
     if (updateDto.webhookSecret) {
-      encryptedSecret = this.encryptionService.encrypt(
-        updateDto.webhookSecret,
-      );
+      encryptedSecret = this.encryptionService.encrypt(updateDto.webhookSecret);
     }
 
     const [updated] = await this.db
@@ -211,10 +207,7 @@ export class WebhookConfigService {
     }
 
     // Check if event is enabled
-    if (
-      !config.enabledEvents ||
-      !config.enabledEvents.includes(eventType)
-    ) {
+    if (!config.enabledEvents || !config.enabledEvents.includes(eventType)) {
       return null;
     }
 
@@ -295,9 +288,10 @@ export class WebhookConfigService {
       tenantId: config.tenantId,
       name: config.name,
       webhookUrl: config.webhookUrl,
-      webhookSecret: includeSecret && config.webhookSecret
-        ? this.encryptionService.decrypt(config.webhookSecret)
-        : undefined,
+      webhookSecret:
+        includeSecret && config.webhookSecret
+          ? this.encryptionService.decrypt(config.webhookSecret)
+          : undefined,
       isActive: config.isActive,
       retryConfig: config.retryConfig,
       eventOverrides: config.eventOverrides,
@@ -315,7 +309,10 @@ export class WebhookConfigService {
       if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
         throw new BadRequestException('Webhook URL must use HTTP or HTTPS');
       }
-      if (parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1') {
+      if (
+        parsedUrl.hostname === 'localhost' ||
+        parsedUrl.hostname === '127.0.0.1'
+      ) {
         throw new BadRequestException('Localhost webhooks are not allowed');
       }
     } catch (error) {

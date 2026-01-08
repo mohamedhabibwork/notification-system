@@ -79,7 +79,7 @@ export class BulkJobsService {
     const bulkItems = items.map((item, index) => ({
       bulkJobId: job.id,
       rowNumber: index + 1,
-      csvData: item as any,
+      csvData: item,
       status: 'pending',
     }));
 
@@ -156,7 +156,7 @@ export class BulkJobsService {
           await this.notificationsService.sendSingle(
             {
               tenantId: job.tenantId,
-              channel: channel as any,
+              channel: channel,
               recipient: {
                 recipientUserId: csvData?.userId || csvData?.user_id,
                 recipientUserType: csvData?.userType || csvData?.user_type,

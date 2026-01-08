@@ -30,7 +30,7 @@ export class CreateLookupDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class UpdateLookupDto {
@@ -52,5 +52,5 @@ export class UpdateLookupDto {
 
   @IsObject()
   @IsOptional()
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }

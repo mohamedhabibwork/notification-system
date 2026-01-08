@@ -779,7 +779,7 @@ interface NotificationJob {
   recipient: RecipientInfo;
   content: MessageContent;
   priority: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 ```
 

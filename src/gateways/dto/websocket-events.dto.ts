@@ -6,7 +6,7 @@ export class NotificationNewEvent {
   body: string;
   priority: string;
   createdAt: Date;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class NotificationStatusEvent {

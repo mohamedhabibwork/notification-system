@@ -14,7 +14,7 @@ export interface NotificationQueuedEvent {
   tenantId: number;
   channel: string;
   recipientUserId: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NotificationSentEvent {
@@ -28,7 +28,7 @@ export interface NotificationSentEvent {
   providerName: string;
   providerMessageId?: string;
   sentAt: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NotificationDeliveredEvent {
@@ -40,7 +40,7 @@ export interface NotificationDeliveredEvent {
   channel: string;
   recipientUserId: string;
   deliveredAt: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NotificationFailedEvent {
@@ -53,7 +53,7 @@ export interface NotificationFailedEvent {
   recipientUserId: string;
   failureReason: string;
   failedAt: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NotificationReadEvent {
@@ -64,7 +64,7 @@ export interface NotificationReadEvent {
   tenantId: number;
   recipientUserId: string;
   readAt: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export type OutgoingNotificationEvent =

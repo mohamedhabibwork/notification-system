@@ -1,9 +1,9 @@
 /**
  * WPPConnect Session Manager Service
- * 
+ *
  * Manages WhatsApp Web sessions per tenant using WPPConnect.
  * Handles QR code generation, authentication, and session lifecycle.
- * 
+ *
  * Reference: https://wppconnect.io/docs/tutorial/basics/creating-client
  */
 
@@ -43,7 +43,7 @@ export class SessionManagerService {
     if (process.env.NODE_ENV === 'production') {
       wppconnect.defaultLogger.level = 'warn';
     } else {
-      wppconnect.defaultLogger.level = 
+      wppconnect.defaultLogger.level =
         this.configService.get<string>('LOG_LEVEL') || 'info';
     }
   }
@@ -81,7 +81,7 @@ export class SessionManagerService {
     // Return existing client if available
     if (this.clients.has(sessionKey)) {
       const client = this.clients.get(sessionKey)!;
-      
+
       // Check if client is still connected
       try {
         const state = await client.getConnectionState();
@@ -107,7 +107,7 @@ export class SessionManagerService {
 
     const client = await wppconnect.create({
       session: sessionKey,
-      
+
       // QR Code callback
       catchQR: async (base64Qrimg, asciiQR, attempts, urlCode) => {
         this.logger.log(
@@ -206,7 +206,9 @@ export class SessionManagerService {
   ): void {
     // Listen for connection state changes
     client.onStateChange((state) => {
-      this.logger.log(`Connection state changed for tenant ${tenantId}: ${state}`);
+      this.logger.log(
+        `Connection state changed for tenant ${tenantId}: ${state}`,
+      );
 
       if (['CONFLICT', 'UNPAIRED', 'TIMEOUT'].includes(state)) {
         this.logger.error(
@@ -266,7 +268,7 @@ export class SessionManagerService {
 
     try {
       const state = await client.getConnectionState();
-      
+
       return {
         tenantId,
         sessionName: sessionKey,
@@ -278,7 +280,7 @@ export class SessionManagerService {
       this.logger.error(
         `Failed to get connection state for tenant ${tenantId}: ${(error as Error).message}`,
       );
-      
+
       return {
         tenantId,
         sessionName: sessionKey,
@@ -299,10 +301,10 @@ export class SessionManagerService {
       try {
         // Stop watchdog (pass any number, it's not actually used for stopping)
         await client.stopPhoneWatchdog(0);
-        
+
         // Close client
         await client.close();
-        
+
         this.logger.log(`Session closed for tenant ${tenantId}`);
       } catch (error) {
         this.logger.error(
@@ -325,10 +327,12 @@ export class SessionManagerService {
   async closeAllSessions(): Promise<void> {
     this.logger.log('Closing all WPPConnect sessions');
 
-    const closePromises = Array.from(this.clients.keys()).map(async (sessionKey) => {
-      const tenantId = parseInt(sessionKey.replace('tenant-', ''));
-      await this.closeSession(tenantId);
-    });
+    const closePromises = Array.from(this.clients.keys()).map(
+      async (sessionKey) => {
+        const tenantId = parseInt(sessionKey.replace('tenant-', ''));
+        await this.closeSession(tenantId);
+      },
+    );
 
     await Promise.all(closePromises);
   }

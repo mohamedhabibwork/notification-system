@@ -4,7 +4,7 @@ export interface RecipientInfo {
   email?: string;
   phone?: string;
   fcmToken?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface MessageContent {
@@ -17,7 +17,7 @@ export interface MessageContent {
     path?: string;
     contentType?: string;
   }>;
-  templateVariables?: Record<string, any>;
+  templateVariables?: Record<string, unknown>;
 }
 
 export interface NotificationJob {
@@ -29,7 +29,7 @@ export interface NotificationJob {
   priority: string;
   templateId?: number;
   batchId?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NotificationJobResult {

@@ -2,7 +2,7 @@
 
 /**
  * Master Seeding Script
- * 
+ *
  * Runs all seeding operations in the correct order:
  * 1. Environment validation
  * 2. Tenants
@@ -24,24 +24,21 @@ import {
   notificationProviders,
   type Tenant,
 } from '../schema';
+import { defaultTemplates, defaultCategories } from './default-templates';
+import { allProviders } from './seed-providers';
+import { defaultTenants } from './seed-users';
 import {
-  defaultTemplates,
-  defaultCategories,
-} from './default-templates';
-import {
-  allProviders,
-} from './seed-providers';
-import {
-  defaultTenants,
-} from './seed-users';
-import { validateOrExit, printValidationResults, validateEnvironment } from './utils/env-validator';
+  validateOrExit,
+  printValidationResults,
+  validateEnvironment,
+} from './utils/env-validator';
 import { seedSystemTemplates } from './seed-system-templates';
 
 dotenv.config();
 
 async function main() {
   console.log('🌱 Master Seeding Started\n');
-  
+
   // 1. Validate environment
   console.log('🔍 Validating environment...');
   validateOrExit();
@@ -82,7 +79,7 @@ async function main() {
     // 3. SEED CATEGORIES (for each tenant)
     // ============================================================================
     console.log('\n📁 Seeding template categories...');
-    
+
     for (const tenant of createdTenants) {
       for (const category of defaultCategories) {
         const [created] = await db
@@ -102,7 +99,9 @@ async function main() {
           .returning();
 
         if (created) {
-          console.log(`  ✅ Created category: ${category.name} for ${tenant.name}`);
+          console.log(
+            `  ✅ Created category: ${category.name} for ${tenant.name}`,
+          );
         }
       }
     }
@@ -125,9 +124,7 @@ async function main() {
         .from(templateCategories)
         .where(eq(templateCategories.tenantId, tenant.id));
 
-      const categoryMap = new Map(
-        categories.map((c) => [c.code, c.id]),
-      );
+      const categoryMap = new Map(categories.map((c) => [c.code, c.id]));
 
       for (const template of defaultTemplates) {
         const categoryId = template.categoryCode
@@ -156,7 +153,9 @@ async function main() {
           .returning();
 
         if (created) {
-          console.log(`  ✅ Created template: ${template.name} for ${tenant.name}`);
+          console.log(
+            `  ✅ Created template: ${template.name} for ${tenant.name}`,
+          );
         }
       }
     }
@@ -165,8 +164,12 @@ async function main() {
     // 5. SKIP PROVIDERS - Manual configuration only
     // ============================================================================
     console.log('\n🔌 Skipping provider seeding...');
-    console.log('  ℹ️  Providers should be configured manually per tenant via API');
-    console.log('  ℹ️  System will fall back to environment config if no tenant providers exist');
+    console.log(
+      '  ℹ️  Providers should be configured manually per tenant via API',
+    );
+    console.log(
+      '  ℹ️  System will fall back to environment config if no tenant providers exist',
+    );
 
     // ============================================================================
     // 6. KEYCLOAK SEEDING (Optional)
@@ -174,7 +177,9 @@ async function main() {
     if (process.env.SEED_KEYCLOAK === 'true') {
       console.log('\n👥 Keycloak seeding...');
       console.log('  ⚠️  Keycloak seeding not yet implemented');
-      console.log('  ℹ️  Please use the Keycloak admin console to create users');
+      console.log(
+        '  ℹ️  Please use the Keycloak admin console to create users',
+      );
       // TODO: Implement Keycloak seeding service
       // await seedKeycloakRealm();
       // await seedKeycloakUsers(createdTenants);
@@ -190,7 +195,9 @@ async function main() {
     console.log(`  ✅ Tenants: ${createdTenants.length}`);
     console.log(`  ✅ Categories: ${defaultCategories.length} per tenant`);
     console.log(`  ✅ Templates: ${defaultTemplates.length} per tenant`);
-    console.log('  ℹ️  Providers: Manual configuration via API (uses env fallback)');
+    console.log(
+      '  ℹ️  Providers: Manual configuration via API (uses env fallback)',
+    );
     console.log('\n✨ Database seeding complete!');
     console.log('\n📝 Next steps:');
     console.log('  1. Configure providers via API: POST /api/providers');
@@ -198,7 +205,6 @@ async function main() {
     console.log('  3. Start the application: npm run start:dev');
     console.log('  4. Access API: http://localhost:3000/api');
     console.log('  5. Access Swagger docs: http://localhost:3000/api/docs\n');
-
   } catch (error) {
     console.error('❌ Seeding failed:', error);
     process.exit(1);

@@ -2,7 +2,7 @@
 
 /**
  * Keycloak User Seeding Script
- * 
+ *
  * Creates admin users, test users, and service accounts in Keycloak.
  * User data is defined in: src/database/seeds/seed-users.ts
  */
@@ -13,7 +13,8 @@ import { adminUsers, testUsers, serviceAccounts } from '../seed-users';
 
 dotenv.config();
 
-const KEYCLOAK_SERVER_URL = process.env.KEYCLOAK_SERVER_URL || 'http://localhost:8080';
+const KEYCLOAK_SERVER_URL =
+  process.env.KEYCLOAK_SERVER_URL || 'http://localhost:8080';
 const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM || 'notification-realm';
 const KEYCLOAK_ADMIN_USERNAME = process.env.KEYCLOAK_ADMIN_USERNAME || 'admin';
 const KEYCLOAK_ADMIN_PASSWORD = process.env.KEYCLOAK_ADMIN_PASSWORD || 'admin';
@@ -41,7 +42,7 @@ async function main() {
     // 1. SEED ADMIN USERS
     // ============================================================================
     console.log('👤 Seeding admin users...');
-    
+
     for (const user of adminUsers) {
       try {
         // Check if user exists
@@ -84,7 +85,7 @@ async function main() {
     // 2. SEED TEST USERS
     // ============================================================================
     console.log('\n👥 Seeding test users...');
-    
+
     for (const user of testUsers) {
       try {
         const existingUsers = await kcAdminClient.users.find({
@@ -126,7 +127,7 @@ async function main() {
     // 3. SEED SERVICE ACCOUNTS
     // ============================================================================
     console.log('\n🔧 Seeding service accounts (OAuth2 clients)...');
-    
+
     for (const service of serviceAccounts) {
       try {
         // Check if client exists
@@ -158,7 +159,10 @@ async function main() {
           console.log(`  ⏭️  Skipped (exists): ${service.clientId}`);
         }
       } catch (error: any) {
-        console.error(`  ❌ Failed to create ${service.clientId}:`, error.message);
+        console.error(
+          `  ❌ Failed to create ${service.clientId}:`,
+          error.message,
+        );
       }
     }
 
@@ -172,10 +176,9 @@ async function main() {
     console.log('\n✨ Keycloak seeding complete!');
     console.log('\n📝 Login credentials:');
     console.log('  Admin users:');
-    adminUsers.forEach(u => {
+    adminUsers.forEach((u) => {
       console.log(`    - ${u.email} / ${u.password}`);
     });
-
   } catch (error) {
     console.error('❌ Keycloak seeding failed:', error);
     process.exit(1);

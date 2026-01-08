@@ -6,10 +6,10 @@ import { SessionManagerService } from './implementations/whatsapp/session-manage
 
 /**
  * Provider Module
- * 
+ *
  * Global module that provides provider selection functionality
  * across the entire application.
- * 
+ *
  * Registers:
  * - ProviderFactory: Creates provider instances
  * - ProviderRegistry: Manages provider lifecycle and caching

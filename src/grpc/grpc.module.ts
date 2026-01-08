@@ -5,7 +5,7 @@ import { join } from 'path';
 
 /**
  * gRPC Module
- * 
+ *
  * Configures gRPC microservice clients for inter-service communication
  */
 @Module({

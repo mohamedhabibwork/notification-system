@@ -1,12 +1,12 @@
 /**
  * Provider-Template Interaction DTOs
- * 
+ *
  * DTOs for testing templates with providers and checking compatibility
  */
 
-import { 
-  IsNumber, 
-  IsObject, 
+import {
+  IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
@@ -114,7 +114,9 @@ export class ProviderTemplateCompatibilityDto {
   @ApiProperty({ description: 'Template channel' })
   templateChannel: string;
 
-  @ApiProperty({ description: 'Whether the template is compatible with the provider' })
+  @ApiProperty({
+    description: 'Whether the template is compatible with the provider',
+  })
   isCompatible: boolean;
 
   @ApiProperty({ description: 'Compatibility score (0-100)' })
@@ -128,7 +130,9 @@ export class ProviderTemplateCompatibilityDto {
  * Test Notification Result DTO
  */
 export class TestNotificationResultDto {
-  @ApiProperty({ description: 'Whether the notification was sent successfully' })
+  @ApiProperty({
+    description: 'Whether the notification was sent successfully',
+  })
   success: boolean;
 
   @ApiProperty({ description: 'Message ID if successful', required: false })
@@ -152,6 +156,9 @@ export class TestNotificationResultDto {
   @ApiProperty({ description: 'Error message if failed', required: false })
   error?: string;
 
-  @ApiProperty({ description: 'Metadata from the provider response', required: false })
+  @ApiProperty({
+    description: 'Metadata from the provider response',
+    required: false,
+  })
   metadata?: Record<string, unknown>;
 }

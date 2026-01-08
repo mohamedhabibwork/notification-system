@@ -20,11 +20,7 @@ import { EncryptionService } from '../../common/services/encryption.service';
     WPPConnectWebhookController,
     WebhookConfigController,
   ],
-  providers: [
-    WebhookClientService,
-    WebhookConfigService,
-    EncryptionService,
-  ],
+  providers: [WebhookClientService, WebhookConfigService, EncryptionService],
   exports: [WebhookClientService, WebhookConfigService],
 })
 export class WebhooksModule {}

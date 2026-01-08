@@ -24,13 +24,13 @@ export class CustomRateLimitGuard extends ThrottlerGuard {
 
   protected async getTracker(req: Request): Promise<string> {
     const authReq = req as AuthenticatedRequest;
-    
+
     // Use tenant ID if available for tenant-specific rate limiting
     const tenantId =
       authReq.tenantId ||
       authReq.user?.tenant_id ||
       authReq.headers['x-tenant-id'];
-      
+
     if (tenantId) {
       return `tenant:${tenantId}:${authReq.ip || 'unknown-ip'}`;
     }

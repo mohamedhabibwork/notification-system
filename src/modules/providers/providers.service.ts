@@ -253,13 +253,16 @@ export class ProvidersService {
   /**
    * Validate provider credentials by attempting a test connection
    */
-  async validateCredentials(id: number, tenantId?: number): Promise<{
+  async validateCredentials(
+    id: number,
+    tenantId?: number,
+  ): Promise<{
     isValid: boolean;
     message?: string;
     error?: string;
   }> {
     const conditions: SQL[] = [eq(notificationProviders.id, id)];
-    
+
     if (tenantId) {
       conditions.push(eq(notificationProviders.tenantId, tenantId));
     }
@@ -301,16 +304,19 @@ export class ProvidersService {
   /**
    * Check provider health status
    */
-  async checkHealth(id: number, tenantId?: number): Promise<{
+  async checkHealth(
+    id: number,
+    tenantId?: number,
+  ): Promise<{
     isHealthy: boolean;
     responseTime?: number;
     message: string;
     error?: string;
   }> {
     const startTime = Date.now();
-    
+
     const conditions: SQL[] = [eq(notificationProviders.id, id)];
-    
+
     if (tenantId) {
       conditions.push(eq(notificationProviders.tenantId, tenantId));
     }
@@ -332,8 +338,8 @@ export class ProvidersService {
       return {
         isHealthy: validation.isValid,
         responseTime,
-        message: validation.isValid 
-          ? `Provider is healthy (${responseTime}ms)` 
+        message: validation.isValid
+          ? `Provider is healthy (${responseTime}ms)`
           : 'Provider health check failed',
         error: validation.error,
       };
@@ -472,11 +478,11 @@ export class ProvidersService {
     },
   ): Promise<SanitizedProvider[]> {
     const conditions: SQL[] = [eq(notificationProviders.tenantId, tenantId)];
-    
+
     if (filters?.channel) {
       conditions.push(eq(notificationProviders.channel, filters.channel));
     }
-    
+
     if (filters?.isActive !== undefined) {
       conditions.push(eq(notificationProviders.isActive, filters.isActive));
     }

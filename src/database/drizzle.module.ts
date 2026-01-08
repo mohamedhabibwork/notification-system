@@ -29,9 +29,11 @@ export const DRIZZLE_ORM = Symbol('DRIZZLE_ORM');
           // Prepare statements to improve query performance
           prepare: true,
           // Enable debug mode in development
-          debug: process.env.NODE_ENV === 'development' ? console.log : undefined,
+          debug:
+            process.env.NODE_ENV === 'development' ? console.log : undefined,
           // Connection lifecycle hooks
-          onnotice: process.env.NODE_ENV === 'development' ? console.log : undefined,
+          onnotice:
+            process.env.NODE_ENV === 'development' ? console.log : undefined,
           // Transform undefined to null for better PostgreSQL compatibility
           transform: {
             undefined: null,

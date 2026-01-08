@@ -52,9 +52,9 @@ export class UserNotificationsController {
     // Extract roles from user context
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.findUserNotifications(
@@ -75,9 +75,9 @@ export class UserNotificationsController {
   ) {
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.getUnreadCount(
@@ -98,9 +98,9 @@ export class UserNotificationsController {
   ) {
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.findOneUserNotification(
@@ -121,9 +121,9 @@ export class UserNotificationsController {
   ) {
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.markAsRead(
@@ -144,9 +144,9 @@ export class UserNotificationsController {
   ) {
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.markAsUnread(
@@ -170,9 +170,9 @@ export class UserNotificationsController {
   ) {
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.deleteNotification(
@@ -200,9 +200,9 @@ export class UserNotificationsController {
   ) {
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.bulkDelete(
@@ -227,9 +227,9 @@ export class UserNotificationsController {
   ) {
     const roles = [
       ...(user?.realm_access?.roles || []),
-      ...(Object.values(user?.resource_access || {}).flatMap(
+      ...Object.values(user?.resource_access || {}).flatMap(
         (resource: any) => resource.roles || [],
-      )),
+      ),
     ];
 
     return this.userNotificationsService.markAllAsRead(

@@ -6,17 +6,29 @@ import {
 } from '@nestjs/common';
 import { DRIZZLE_ORM } from '../../database/drizzle.module';
 import type { DrizzleDB } from '../../database/drizzle.module';
-import { notifications, notificationBatches } from '../../database/schema';
+import {
+  notifications,
+  notificationBatches,
+  Notification,
+} from '../../database/schema';
 import { eq, and, desc } from 'drizzle-orm';
 import {
   SendNotificationDto,
   SendBatchDto,
   SendChunkDto,
 } from './dto/send-notification.dto';
+import {
+  BroadcastNotificationDto,
+  BroadcastResultDto,
+  ChannelResult,
+} from './dto/broadcast-notification.dto';
+import { SendMultiDto, SendMultiResultDto } from './dto/send-multi.dto';
 import { NotificationValidatorService } from './services/notification-validator.service';
 import { UserEnrichmentService } from './services/user-enrichment.service';
 import { NotificationProcessorService } from './services/notification-processor.service';
+import { MultiNotificationService } from './services/multi-notification.service';
 import { EventProducerService } from '../events/event-producer.service';
+import { NotificationEventType } from '../events/dto/outgoing-events.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -25,6 +37,7 @@ export class NotificationsService {
     private readonly validator: NotificationValidatorService,
     private readonly enrichment: UserEnrichmentService,
     private readonly processor: NotificationProcessorService,
+    private readonly multiNotification: MultiNotificationService,
     private readonly eventProducer: EventProducerService,
   ) {}
 
@@ -43,15 +56,13 @@ export class NotificationsService {
     this.validator.validateNotificationRequest(dto);
 
     // Process and queue notification
-    const notification = await this.processor.processSingleNotification(
-      dto,
-      createdBy,
-    );
+    const notification: Notification =
+      await this.processor.processSingleNotification(dto, createdBy);
 
     // Publish event
     await this.eventProducer.publishNotificationEvent({
       eventId: notification.uuid,
-      eventType: 'notification.queued' as any,
+      eventType: NotificationEventType.QUEUED,
       timestamp: Date.now(),
       notificationId: notification.id,
       tenantId: dto.tenantId,
@@ -211,5 +222,151 @@ export class NotificationsService {
     }
 
     return notification;
+  }
+
+  /**
+   * Send notification to multiple channels simultaneously
+   */
+  async sendBroadcast(
+    dto: BroadcastNotificationDto,
+    createdBy: string,
+  ): Promise<BroadcastResultDto> {
+    // Validate at least one channel is specified
+    if (!dto.channels || dto.channels.length === 0) {
+      throw new Error('At least one channel must be specified for broadcast');
+    }
+
+    // Enrich recipient data once (shared across all channels)
+    const enrichedRecipient = await this.enrichment.enrichRecipient(
+      dto.recipient,
+      dto.tenantId,
+    );
+
+    const results: ChannelResult[] = [];
+    const timestamp = new Date();
+
+    // Create promises for all channels
+    const channelPromises = dto.channels.map(async (channel) => {
+      // Build notification DTO for this channel
+      const notificationDto: SendNotificationDto = {
+        tenantId: dto.tenantId,
+        channel,
+        recipient: enrichedRecipient,
+        templateId: dto.templateId,
+        templateCode: dto.templateCode,
+        templateVariables: dto.templateVariables,
+        directContent: dto.directContent,
+        metadata: {
+          ...dto.metadata,
+          broadcastId: timestamp.getTime().toString(),
+          provider: dto.options?.providers?.[channel],
+        },
+      };
+
+      try {
+        // Validate channel-specific request
+        this.validator.validateNotificationRequest(notificationDto);
+
+        // Process notification for this channel
+        const notification = await this.processor.processSingleNotification(
+          notificationDto,
+          createdBy,
+        );
+
+        // Publish event
+        await this.eventProducer.publishNotificationEvent({
+          eventId: notification.uuid,
+          eventType: NotificationEventType.QUEUED,
+          timestamp: Date.now(),
+          notificationId: notification.id,
+          tenantId: dto.tenantId,
+          channel: notification.channel,
+          recipientUserId: notification.recipientUserId,
+        });
+
+        const channelResult: ChannelResult = {
+          channel,
+          success: true,
+          messageId: notification.id.toString(),
+          provider: (dto.metadata?.provider as string) || 'default',
+          timestamp,
+        };
+
+        return channelResult;
+      } catch (error) {
+        const channelResult: ChannelResult = {
+          channel,
+          success: false,
+          error: {
+            code: (error as Error).name || 'BROADCAST_ERROR',
+            message: (error as Error).message || 'Unknown error',
+          },
+          timestamp,
+        };
+
+        return channelResult;
+      }
+    });
+
+    // Execute all channel sends
+    if (dto.options?.stopOnFirstSuccess) {
+      // Race mode: stop after first success
+      try {
+        const firstSuccess = await Promise.race(channelPromises);
+        results.push(firstSuccess);
+      } catch (error) {
+        // If all fail, collect all results
+        const settledResults = await Promise.allSettled(channelPromises);
+        results.push(
+          ...settledResults
+            .filter((r) => r.status === 'fulfilled')
+            .map((r) => r.value),
+        );
+      }
+    } else {
+      // Parallel mode: send to all channels
+      const settledResults = await Promise.allSettled(channelPromises);
+      results.push(
+        ...settledResults
+          .filter((r) => r.status === 'fulfilled')
+          .map((r) => r.value),
+      );
+    }
+
+    // Calculate statistics
+    const successCount = results.filter((r) => r.success).length;
+    const failureCount = results.filter((r) => !r.success).length;
+    const overallSuccess = successCount > 0;
+
+    // Check if requireAllSuccess option is set
+    if (dto.options?.requireAllSuccess && failureCount > 0) {
+      throw new Error(
+        `Broadcast failed: ${failureCount} out of ${results.length} channels failed. Required all channels to succeed.`,
+      );
+    }
+
+    return {
+      success: overallSuccess,
+      totalChannels: dto.channels.length,
+      successCount,
+      failureCount,
+      results,
+      timestamp,
+      metadata: {
+        broadcastId: timestamp.getTime().toString(),
+        tenantId: dto.tenantId,
+        recipientUserId: enrichedRecipient.recipientUserId,
+      },
+    };
+  }
+
+  /**
+   * Send notifications to multiple users across multiple channels
+   */
+  async sendMulti(
+    dto: SendMultiDto,
+    createdBy: string,
+  ): Promise<SendMultiResultDto> {
+    return this.multiNotification.sendMulti(dto, createdBy);
   }
 }

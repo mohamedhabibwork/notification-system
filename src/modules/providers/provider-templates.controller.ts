@@ -1,6 +1,6 @@
 /**
  * Provider Templates Controller
- * 
+ *
  * Handles provider-scoped template operations like testing and compatibility
  */
 
@@ -46,10 +46,10 @@ export class ProviderTemplatesController {
   @Roles('notification-admin', 'notification-manager', 'notification-viewer')
   @ApiOperation({ summary: 'List templates compatible with provider' })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
-  @ApiQuery({ 
-    name: 'tenantId', 
-    required: false, 
-    description: 'Tenant ID to filter templates' 
+  @ApiQuery({
+    name: 'tenantId',
+    required: false,
+    description: 'Tenant ID to filter templates',
   })
   @ApiResponse({ status: 200, description: 'List of compatible templates' })
   async findCompatibleTemplates(
@@ -63,8 +63,8 @@ export class ProviderTemplatesController {
   @Roles('notification-admin', 'notification-manager', 'notification-viewer')
   @ApiOperation({ summary: 'Get recommended templates for provider type' })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'List of recommended templates',
   })
   async getRecommendedTemplates(
@@ -78,8 +78,8 @@ export class ProviderTemplatesController {
   @ApiOperation({ summary: 'Test template rendering with provider' })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
   @ApiParam({ name: 'templateId', description: 'Template ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Template rendering test result',
     type: TemplateTestResultDto,
   })
@@ -99,11 +99,13 @@ export class ProviderTemplatesController {
 
   @Post(':templateId/send-test')
   @Roles('notification-admin', 'notification-manager')
-  @ApiOperation({ summary: 'Send test notification using provider and template' })
+  @ApiOperation({
+    summary: 'Send test notification using provider and template',
+  })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
   @ApiParam({ name: 'templateId', description: 'Template ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Test notification result',
     type: TestNotificationResultDto,
   })
@@ -149,8 +151,8 @@ export class ProviderTemplatesController {
   @ApiOperation({ summary: 'Check template compatibility with provider' })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
   @ApiParam({ name: 'templateId', description: 'Template ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Compatibility analysis',
     type: ProviderTemplateCompatibilityDto,
   })
@@ -202,11 +204,13 @@ export class ProviderTemplatesController {
 
   @Post(':templateId/validate-variables')
   @Roles('notification-admin', 'notification-manager')
-  @ApiOperation({ summary: 'Validate template variables against provider requirements' })
+  @ApiOperation({
+    summary: 'Validate template variables against provider requirements',
+  })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
   @ApiParam({ name: 'templateId', description: 'Template ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Variable validation result',
   })
   async validateVariables(

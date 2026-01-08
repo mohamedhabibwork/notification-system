@@ -91,11 +91,17 @@ export class LookupsController {
             type: 'object',
             properties: {
               id: { type: 'number', example: 1 },
-              uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+              uuid: {
+                type: 'string',
+                example: '123e4567-e89b-12d3-a456-426614174000',
+              },
               lookupTypeId: { type: 'number', example: 1 },
               code: { type: 'string', example: 'pending' },
               displayName: { type: 'string', example: 'Pending' },
-              description: { type: 'string', example: 'Notification is pending' },
+              description: {
+                type: 'string',
+                example: 'Notification is pending',
+              },
               sortOrder: { type: 'number', example: 1 },
               isActive: { type: 'boolean', example: true },
               metadata: { type: 'object', example: { color: 'yellow' } },
@@ -137,7 +143,10 @@ export class LookupsController {
       type: 'object',
       properties: {
         id: { type: 'number', example: 1 },
-        uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        uuid: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         lookupTypeId: { type: 'number', example: 1 },
         code: { type: 'string', example: 'pending' },
         displayName: { type: 'string', example: 'Pending' },
@@ -177,7 +186,10 @@ export class LookupsController {
         type: 'object',
         properties: {
           id: { type: 'number', example: 1 },
-          uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          uuid: {
+            type: 'string',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
           lookupTypeId: { type: 'number', example: 1 },
           code: { type: 'string', example: 'pending' },
           displayName: { type: 'string', example: 'Pending' },
@@ -201,7 +213,8 @@ export class LookupsController {
   @Public()
   @ApiOperation({
     summary: 'Validate if a lookup code exists',
-    description: 'Check if a lookup code exists and is active for a specific type',
+    description:
+      'Check if a lookup code exists and is active for a specific type',
   })
   @ApiParam({
     name: 'typeName',
@@ -258,11 +271,17 @@ export class LookupsController {
       type: 'object',
       properties: {
         id: { type: 'number', example: 10 },
-        uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        uuid: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         lookupTypeId: { type: 'number', example: 1 },
         code: { type: 'string', example: 'processing' },
         displayName: { type: 'string', example: 'Processing' },
-        description: { type: 'string', example: 'Notification is being processed' },
+        description: {
+          type: 'string',
+          example: 'Notification is being processed',
+        },
         sortOrder: { type: 'number', example: 2 },
         isActive: { type: 'boolean', example: true },
         metadata: { type: 'object', example: { color: 'blue' } },
@@ -353,7 +372,10 @@ export class LookupsController {
       type: 'object',
       properties: {
         id: { type: 'number', example: 1 },
-        uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        uuid: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         lookupTypeId: { type: 'number', example: 1 },
         code: { type: 'string', example: 'pending' },
         displayName: { type: 'string', example: 'Pending Delivery' },
@@ -441,7 +463,8 @@ export class LookupsController {
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete a lookup (soft delete)',
-    description: 'Soft delete a lookup by setting isActive to false (admin only)',
+    description:
+      'Soft delete a lookup by setting isActive to false (admin only)',
   })
   @ApiParam({
     name: 'id',
@@ -483,4 +506,3 @@ export class LookupsController {
     return this.lookupsService.delete(id, user.sub);
   }
 }
-

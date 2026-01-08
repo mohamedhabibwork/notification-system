@@ -54,6 +54,7 @@ export interface ProviderSendPayload {
     phone?: string;
     deviceToken?: string;
     userId?: string;
+    channel?: string; // For WebSocket channel broadcasts
     metadata?: Record<string, unknown>;
   };
   content: {

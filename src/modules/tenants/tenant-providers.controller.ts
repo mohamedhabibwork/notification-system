@@ -1,6 +1,6 @@
 /**
  * Tenant Providers Controller
- * 
+ *
  * Handles tenant-scoped provider management operations
  */
 
@@ -24,7 +24,10 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { ProvidersService } from '../providers/providers.service';
-import { CreateProviderDto, UpdateProviderDto } from '../providers/dto/provider.dto';
+import {
+  CreateProviderDto,
+  UpdateProviderDto,
+} from '../providers/dto/provider.dto';
 import {
   BulkCreateProvidersDto,
   BulkUpdateProvidersDto,
@@ -64,8 +67,16 @@ export class TenantProvidersController {
   @Roles('notification-admin', 'notification-manager', 'notification-viewer')
   @ApiOperation({ summary: 'List all providers for a tenant' })
   @ApiParam({ name: 'tenantId', description: 'Tenant ID' })
-  @ApiQuery({ name: 'channel', required: false, description: 'Filter by channel type' })
-  @ApiQuery({ name: 'isActive', required: false, description: 'Filter by active status' })
+  @ApiQuery({
+    name: 'channel',
+    required: false,
+    description: 'Filter by channel type',
+  })
+  @ApiQuery({
+    name: 'isActive',
+    required: false,
+    description: 'Filter by active status',
+  })
   @ApiResponse({ status: 200, description: 'List of providers' })
   async findAll(
     @Param('tenantId', ParseIntPipe) tenantId: number,
@@ -100,7 +111,12 @@ export class TenantProvidersController {
     @Body() updateDto: UpdateProviderDto,
     @CurrentUser() user: UserContext,
   ) {
-    return this.providersService.update(providerId, updateDto, user.sub, tenantId);
+    return this.providersService.update(
+      providerId,
+      updateDto,
+      user.sub,
+      tenantId,
+    );
   }
 
   @Delete(':providerId')
@@ -121,8 +137,8 @@ export class TenantProvidersController {
   @ApiOperation({ summary: 'Validate provider credentials' })
   @ApiParam({ name: 'tenantId', description: 'Tenant ID' })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Validation result',
     type: ValidateProviderResponseDto,
   })
@@ -145,8 +161,8 @@ export class TenantProvidersController {
   @ApiOperation({ summary: 'Check provider health status' })
   @ApiParam({ name: 'tenantId', description: 'Tenant ID' })
   @ApiParam({ name: 'providerId', description: 'Provider ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Health status',
     type: ProviderHealthResponseDto,
   })
@@ -176,8 +192,8 @@ export class TenantProvidersController {
   @Roles('notification-admin', 'notification-manager')
   @ApiOperation({ summary: 'Bulk create providers for a tenant' })
   @ApiParam({ name: 'tenantId', description: 'Tenant ID' })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Bulk create result',
     type: BulkOperationResultDto,
   })
@@ -199,8 +215,8 @@ export class TenantProvidersController {
   @Roles('notification-admin', 'notification-manager')
   @ApiOperation({ summary: 'Bulk update providers for a tenant' })
   @ApiParam({ name: 'tenantId', description: 'Tenant ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Bulk update result',
     type: BulkOperationResultDto,
   })
@@ -220,8 +236,8 @@ export class TenantProvidersController {
   @Roles('notification-admin')
   @ApiOperation({ summary: 'Bulk delete providers for a tenant' })
   @ApiParam({ name: 'tenantId', description: 'Tenant ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Bulk delete result',
     type: BulkOperationResultDto,
   })

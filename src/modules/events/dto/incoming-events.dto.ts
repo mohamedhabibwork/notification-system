@@ -22,7 +22,11 @@ export class BaseEventDto {
   @IsString()
   eventId: string;
 
-  @ApiProperty({ description: 'Event type', enum: EventType, example: EventType.ORDER_CREATED })
+  @ApiProperty({
+    description: 'Event type',
+    enum: EventType,
+    example: EventType.ORDER_CREATED,
+  })
   @IsString()
   eventType: string;
 
@@ -45,7 +49,10 @@ export class OrderCreatedEventDto extends BaseEventDto {
   @IsString()
   customerId: string;
 
-  @ApiPropertyOptional({ description: 'Customer email', example: 'customer@example.com' })
+  @ApiPropertyOptional({
+    description: 'Customer email',
+    example: 'customer@example.com',
+  })
   @IsString()
   @IsOptional()
   customerEmail?: string;
@@ -55,7 +62,10 @@ export class OrderCreatedEventDto extends BaseEventDto {
   @IsOptional()
   orderTotal?: number;
 
-  @ApiPropertyOptional({ description: 'Additional metadata', example: { items: 3 } })
+  @ApiPropertyOptional({
+    description: 'Additional metadata',
+    example: { items: 3 },
+  })
   @IsObject()
   @IsOptional()
   metadata?: Record<string, unknown>;
@@ -75,7 +85,10 @@ export class OrderShippedEventDto extends BaseEventDto {
   @IsOptional()
   trackingNumber?: string;
 
-  @ApiPropertyOptional({ description: 'Additional metadata', example: { carrier: 'UPS' } })
+  @ApiPropertyOptional({
+    description: 'Additional metadata',
+    example: { carrier: 'UPS' },
+  })
   @IsObject()
   @IsOptional()
   metadata?: Record<string, unknown>;
@@ -94,12 +107,18 @@ export class PaymentCompletedEventDto extends BaseEventDto {
   @IsNumber()
   amount: number;
 
-  @ApiPropertyOptional({ description: 'Related order ID', example: 'order-123' })
+  @ApiPropertyOptional({
+    description: 'Related order ID',
+    example: 'order-123',
+  })
   @IsString()
   @IsOptional()
   orderId?: string;
 
-  @ApiPropertyOptional({ description: 'Additional metadata', example: { method: 'credit_card' } })
+  @ApiPropertyOptional({
+    description: 'Additional metadata',
+    example: { method: 'credit_card' },
+  })
   @IsObject()
   @IsOptional()
   metadata?: Record<string, unknown>;
@@ -118,7 +137,10 @@ export class PaymentFailedEventDto extends BaseEventDto {
   @IsString()
   reason: string;
 
-  @ApiPropertyOptional({ description: 'Additional metadata', example: { attemptNumber: 1 } })
+  @ApiPropertyOptional({
+    description: 'Additional metadata',
+    example: { attemptNumber: 1 },
+  })
   @IsObject()
   @IsOptional()
   metadata?: Record<string, unknown>;
@@ -143,7 +165,10 @@ export class UserRegisteredEventDto extends BaseEventDto {
   @IsOptional()
   lastName?: string;
 
-  @ApiPropertyOptional({ description: 'Additional metadata', example: { source: 'web' } })
+  @ApiPropertyOptional({
+    description: 'Additional metadata',
+    example: { source: 'web' },
+  })
   @IsObject()
   @IsOptional()
   metadata?: Record<string, unknown>;
@@ -158,15 +183,24 @@ export class UserPasswordResetEventDto extends BaseEventDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ description: 'Password reset token', example: 'reset-token-abc' })
+  @ApiProperty({
+    description: 'Password reset token',
+    example: 'reset-token-abc',
+  })
   @IsString()
   resetToken: string;
 
-  @ApiProperty({ description: 'Token expiration timestamp', example: 1704808800000 })
+  @ApiProperty({
+    description: 'Token expiration timestamp',
+    example: 1704808800000,
+  })
   @IsNumber()
   expiresAt: number;
 
-  @ApiPropertyOptional({ description: 'Additional metadata', example: { ipAddress: '1.2.3.4' } })
+  @ApiPropertyOptional({
+    description: 'Additional metadata',
+    example: { ipAddress: '1.2.3.4' },
+  })
   @IsObject()
   @IsOptional()
   metadata?: Record<string, unknown>;

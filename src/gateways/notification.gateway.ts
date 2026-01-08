@@ -123,6 +123,13 @@ export class NotificationGateway
     this.logger.log(`Sent notification to user ${userId}`);
   }
 
+  // Send notification to all users in a channel
+  broadcastToChannel(channelName: string, notification: any) {
+    const channelRoom = `channel:${channelName}`;
+    this.server.to(channelRoom).emit('notification:new', notification);
+    this.logger.log(`Sent notification to channel ${channelName}`);
+  }
+
   // Send notification status update to user
   sendStatusUpdate(
     userId: string,
@@ -177,6 +184,28 @@ export class NotificationGateway
   @SubscribeMessage('ping')
   handlePing(@ConnectedSocket() client: Socket) {
     client.emit('pong', { timestamp: new Date() });
+  }
+
+  @SubscribeMessage('channel:join')
+  async handleJoinChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelName: string },
+  ) {
+    const channelRoom = `channel:${data.channelName}`;
+    await client.join(channelRoom);
+    this.logger.log(`Client ${client.id} joined channel ${data.channelName}`);
+    client.emit('channel:joined', { channelName: data.channelName });
+  }
+
+  @SubscribeMessage('channel:leave')
+  async handleLeaveChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelName: string },
+  ) {
+    const channelRoom = `channel:${data.channelName}`;
+    await client.leave(channelRoom);
+    this.logger.log(`Client ${client.id} left channel ${data.channelName}`);
+    client.emit('channel:left', { channelName: data.channelName });
   }
 
   // Get count of connected users

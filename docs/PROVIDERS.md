@@ -4,8 +4,9 @@ This document provides comprehensive information about all supported notificatio
 
 ## Overview
 
-The notification system supports **14 implemented providers** plus access to **50+ additional services** through Apprise, organized into the following categories:
+The notification system supports **17 implemented providers** plus access to **50+ additional services** through Apprise, organized into the following categories:
 
+- **WebSocket**: Real-time bidirectional WebSocket notifications ⭐ NEW
 - **Chat**: Discord, Slack, Microsoft Teams, Google Chat, Mattermost (+ others via Apprise)
 - **Messenger**: Telegram, Signal, LINE Messenger, LINE Notify
 - **Push**: Pushover, Gotify, Ntfy, Bark, and more
@@ -14,7 +15,13 @@ The notification system supports **14 implemented providers** plus access to **5
 - **IoT**: Home Assistant, Nostr, OneBot
 - **Email**: SendGrid, AWS SES, Mailgun
 - **SMS**: Twilio, AWS SNS, ClickSend, Octopush, SMSEagle
+- **FCM**: Firebase FCM, Apple APN, Huawei Push Kit
 - **WhatsApp**: WhatsApp Business API, WPPConnect
+- **Database**: Database-Inbox for in-app notifications
+
+## 🆕 Multi-Channel Broadcast
+
+Send the same notification across multiple channels simultaneously! See [Multi-Channel Broadcast Documentation](./MULTI_CHANNEL_BROADCAST.md) for details.
 
 ## Quick Start
 
@@ -46,7 +53,34 @@ curl -X POST http://localhost:3000/api/v1/notifications/send \
 
 ## Provider Categories
 
-### 1. Chat Providers
+### 1. WebSocket Provider ⭐ NEW
+
+Real-time bidirectional WebSocket communication for instant notifications.
+
+#### WebSocket
+- **Status**: ✅ Implemented
+- **Modes**: Internal (NotificationGateway) & External (ws/Socket.IO)
+- **Features**: 
+  - Real-time push notifications
+  - Channel/room broadcasts
+  - Bidirectional communication
+  - Request-response pattern
+  - Automatic reconnection
+  - Multiple authentication methods
+  - Message compression & acknowledgments
+  - Event subscription & handling
+- **Rate Limit**: 100 msg/sec, 10M/day
+- **Setup**: Choose internal mode (no setup) or configure external WebSocket server
+- **Use Cases**: 
+  - Real-time user notifications
+  - In-app alerts and updates
+  - Channel broadcasts
+  - Third-party WebSocket integration
+  - Microservices communication
+  - IoT device messaging
+- **Docs**: [WebSocket Provider](./providers/WEBSOCKET_PROVIDER.md)
+
+### 2. Chat Providers
 
 For team collaboration and workspace notifications.
 
@@ -85,7 +119,7 @@ For team collaboration and workspace notifications.
 - **Setup**: Create incoming webhook in Mattermost
 - **Docs**: [Mattermost Provider](./providers/CHAT_PROVIDERS.md#mattermost)
 
-### 2. Messenger Providers
+### 3. Messenger Providers
 
 For instant messaging and direct user communication.
 
@@ -115,7 +149,35 @@ For instant messaging and direct user communication.
 - **Setup**: Generate LINE Notify token
 - **Docs**: [LINE Notify Provider](./providers/MESSENGER_PROVIDERS.md#line-notify)
 
-### 3. Push Notification Providers
+### 3. FCM (Mobile Push) Providers
+
+For mobile app push notifications.
+
+#### Firebase Cloud Messaging (FCM)
+- **Status**: ✅ Implemented
+- **Platform**: Android, iOS, Web
+- **Features**: Push notifications, data messages, topics, device groups
+- **Rate Limit**: 10 req/sec, 1M/day (free tier)
+- **Setup**: Configure Firebase project, download service account key
+- **Docs**: [Firebase FCM Documentation](https://firebase.google.com/docs/cloud-messaging)
+
+#### Apple Push Notification Service (APNs)
+- **Status**: ✅ Implemented
+- **Platform**: iOS, macOS, watchOS, tvOS
+- **Features**: Push notifications, background updates, badges, sounds
+- **Rate Limit**: 10 req/sec, unlimited (Apple doesn't impose limits)
+- **Setup**: Generate APNs certificate or token-based key
+- **Docs**: [Apple APNs Documentation](https://developer.apple.com/documentation/usernotifications)
+
+#### Huawei Push Kit ⭐ NEW
+- **Status**: ✅ Implemented
+- **Platform**: Android (Huawei devices)
+- **Features**: Push notifications for Huawei Mobile Services (HMS)
+- **Rate Limit**: 10 req/sec, 1M/day (free tier)
+- **Setup**: Create app in AppGallery Connect, get OAuth credentials
+- **Docs**: [Huawei Push Kit Provider](./providers/HUAWEI_PUSHKIT.md)
+
+### 4. Push Notification Providers
 
 For mobile and desktop push notifications.
 
@@ -140,7 +202,18 @@ For mobile and desktop push notifications.
 - **Setup**: Choose topic name (no registration needed)
 - **Docs**: [Ntfy Provider](./providers/PUSH_PROVIDERS.md#ntfy)
 
-### 4. Alert/Incident Management Providers
+### 5. Database Provider ⭐ NEW
+
+For in-app notifications and persistent storage.
+
+#### Database-Inbox
+- **Status**: ✅ Implemented
+- **Features**: In-app inbox, notification history, read/unread tracking
+- **Rate Limit**: 1000 req/sec (database-dependent)
+- **Setup**: Automatically enabled, no external credentials needed
+- **Docs**: [Database Provider](./providers/DATABASE_PROVIDER.md)
+
+### 6. Alert/Incident Management Providers
 
 For DevOps alerts and incident management.
 
@@ -158,7 +231,7 @@ For DevOps alerts and incident management.
 - **Setup**: Create API integration in Opsgenie
 - **Docs**: [Opsgenie Provider](./providers/ALERT_PROVIDERS.md#opsgenie)
 
-### 5. Webhook Provider
+### 7. Webhook Provider
 
 For custom integrations with any HTTP endpoint.
 
@@ -169,7 +242,7 @@ For custom integrations with any HTTP endpoint.
 - **Setup**: Provide endpoint URL and authentication
 - **Docs**: [Webhook Provider](./providers/WEBHOOK_PROVIDER.md)
 
-### 6. Aggregator Provider
+### 8. Aggregator Provider
 
 #### Apprise
 - **Status**: ✅ Implemented
@@ -331,8 +404,35 @@ Track provider performance with built-in metrics:
 
 Access metrics at: `http://localhost:3000/metrics`
 
+## Multi-Channel Broadcast
+
+Send notifications to multiple channels simultaneously:
+
+```bash
+POST /api/v1/services/notifications/broadcast
+{
+  "tenantId": 1,
+  "channels": ["email", "sms", "database", "fcm"],
+  "recipient": {
+    "recipientUserId": "user123",
+    "recipientEmail": "user@example.com",
+    "recipientPhone": "+1234567890",
+    "deviceToken": "fcm-token-here"
+  },
+  "directContent": {
+    "subject": "Critical Alert",
+    "body": "Your account requires immediate attention"
+  }
+}
+```
+
+See [Multi-Channel Broadcast Documentation](./MULTI_CHANNEL_BROADCAST.md) for details.
+
 ## Next Steps
 
+- [Huawei Push Kit Provider](./providers/HUAWEI_PUSHKIT.md) ⭐ NEW
+- [Database Provider](./providers/DATABASE_PROVIDER.md) ⭐ NEW
+- [Multi-Channel Broadcast](./MULTI_CHANNEL_BROADCAST.md) ⭐ NEW
 - [Chat Providers Documentation](./providers/CHAT_PROVIDERS.md)
 - [Messenger Providers Documentation](./providers/MESSENGER_PROVIDERS.md)
 - [Push Providers Documentation](./providers/PUSH_PROVIDERS.md)

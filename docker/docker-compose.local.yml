@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # Notification Service (Main)
+  # Notification Service (Main) - includes all workers via NestJS ProcessorsModule
   notification-service:
     build:
       context: ..
@@ -34,48 +34,6 @@ services:
       - ../proto:/app/proto
     networks:
       - notification-network
-    restart: unless-stopped
-
-  # Email Worker
-  email-worker:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.worker
-    environment:
-      - WORKER_TYPE=email
-      - KAFKA_BROKERS=kafka:29092
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://notification:notification@postgres:5432/notification_db
-      - WORKER_EMAIL_CONCURRENCY=5
-    depends_on:
-      - kafka
-      - redis
-      - postgres
-    networks:
-      - notification-network
-    deploy:
-      replicas: 2
-    restart: unless-stopped
-
-  # SMS Worker
-  sms-worker:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.worker
-    environment:
-      - WORKER_TYPE=sms
-      - KAFKA_BROKERS=kafka:29092
-      - REDIS_URL=redis://redis:6379
-      - DATABASE_URL=postgresql://notification:notification@postgres:5432/notification_db
-      - WORKER_SMS_CONCURRENCY=10
-    depends_on:
-      - kafka
-      - redis
-      - postgres
-    networks:
-      - notification-network
-    deploy:
-      replicas: 2
     restart: unless-stopped
 
   # Observability Stack

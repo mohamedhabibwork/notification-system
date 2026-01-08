@@ -52,20 +52,20 @@ export class AuthController {
   @ApiExcludeEndpoint()
   @Public()
   oauth2Redirect(@Res() res: Response, @Query() query: Record<string, string>) {
-    const keycloakConfigured = 
+    const keycloakConfigured =
       this.configService.get<string>('keycloak.serverUrl') &&
       this.configService.get<string>('keycloak.realm') &&
       this.configService.get<string>('keycloak.userClientId');
 
     // Log query parameters for debugging
-    if (query.error as string) {
+    if (query.error) {
       console.error('OAuth2 Error:', {
-        error: query.error as string,
-        error_description: query.error_description as string,
-        error_uri: query.error_uri as string,
+        error: query.error,
+        error_description: query.error_description,
+        error_uri: query.error_uri,
       });
     }
-    
+
     // This is the standard OAuth2/OIDC redirect HTML that Swagger UI expects
     const html = `<!doctype html>
 <html lang="en-US">
@@ -213,7 +213,6 @@ export class AuthController {
     res.setHeader('Content-Type', 'text/html');
     res.send(html);
   }
-
 
   @Post('v1/auth/refresh')
   @Public()

@@ -5,13 +5,20 @@
  * Automatically registers all available providers on module initialization.
  */
 
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { ProviderFactory } from '../factory/provider.factory';
 import {
   IProvider,
   IProviderCredentials,
 } from '../interfaces/provider.interface';
 import { ChannelType } from '../types';
+import { SessionManagerService } from '../implementations/whatsapp/session-manager.service';
 
 // Import all provider implementations
 import { SendGridProvider } from '../implementations/email/sendgrid.provider';
@@ -44,12 +51,33 @@ import { WebhookProvider } from '../implementations/webhook/webhook.provider';
 // Aggregator provider
 import { AppriseProvider } from '../implementations/aggregator/apprise.provider';
 
+// FCM providers
+import { HuaweiPushKitProvider } from '../implementations/fcm/huawei-pushkit.provider';
+
+// Database provider
+import { DatabaseInboxProvider } from '../implementations/database/database-inbox.provider';
+import { DRIZZLE_ORM } from '../../../database/drizzle.module';
+import type { DrizzleDB } from '../../../database/drizzle.module';
+
+// WebSocket provider
+import { WebSocketProvider } from '../implementations/websocket/websocket.provider';
+import { WebSocketMessageHandlerService } from '../implementations/websocket/services/message-handler.service';
+import { NotificationGateway } from '../../../gateways/notification.gateway';
+
 @Injectable()
 export class ProviderRegistry implements OnModuleInit {
   private readonly logger = new Logger(ProviderRegistry.name);
   private readonly instances = new Map<string, IProvider>();
 
-  constructor(private readonly factory: ProviderFactory) {}
+  constructor(
+    private readonly factory: ProviderFactory,
+    @Inject(forwardRef(() => SessionManagerService))
+    private readonly sessionManager: SessionManagerService,
+    @Inject(DRIZZLE_ORM) private readonly db: DrizzleDB,
+    @Inject(forwardRef(() => NotificationGateway))
+    private readonly notificationGateway: NotificationGateway,
+    private readonly messageHandler: WebSocketMessageHandlerService,
+  ) {}
 
   /**
    * Register all providers on module initialization
@@ -97,6 +125,15 @@ export class ProviderRegistry implements OnModuleInit {
     // Aggregator provider (Tier 1) - Provides access to 50+ services
     this.factory.register('apprise', AppriseProvider);
 
+    // FCM providers
+    this.factory.register('huawei-pushkit', HuaweiPushKitProvider);
+
+    // Database provider - for in-app inbox
+    this.factory.register('database-inbox', DatabaseInboxProvider);
+
+    // WebSocket provider - for real-time notifications
+    this.factory.register('websocket', WebSocketProvider);
+
     // TODO: Register Tier 3 providers as needed
     // Many Tier 3 providers are already accessible via Apprise
     // this.factory.register('ses', SESProvider);
@@ -124,6 +161,24 @@ export class ProviderRegistry implements OnModuleInit {
     }
 
     const provider = this.factory.create(providerName, credentials);
+
+    // Special handling for WPPConnectProvider - inject SessionManager
+    if (provider instanceof WPPConnectProvider) {
+      provider.setSessionManager(this.sessionManager);
+    }
+
+    // Special handling for DatabaseInboxProvider - inject Database
+    if (provider instanceof DatabaseInboxProvider) {
+      provider.setDatabase(this.db);
+    }
+
+    // Special handling for WebSocketProvider - inject Gateway and MessageHandler
+    if (provider instanceof WebSocketProvider) {
+      if ((provider as any).credentials.mode === 'internal') {
+        provider.setGateway(this.notificationGateway);
+      }
+      provider.setMessageHandler(this.messageHandler);
+    }
 
     // Validate on first creation
     const isValid = await provider.validate();

@@ -8,6 +8,7 @@ export type ChannelType =
   | 'fcm'
   | 'whatsapp'
   | 'database'
+  | 'websocket' // WebSocket real-time notifications (internal gateway & external servers)
   | 'chat' // Discord, Slack, Teams, Google Chat, Mattermost, Rocket.Chat, Matrix, Kook, ZohoCliq, Stackfield
   | 'messenger' // Telegram, Signal, LINE Messenger, LINE Notify
   | 'push' // Pushover, Pushbullet, Pushy, Push by Techulus, Gorush, Gotify, Ntfy, Bark, LunaSea

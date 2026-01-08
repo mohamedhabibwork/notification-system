@@ -16,7 +16,10 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { LookupsService } from './lookups.service';
-import { CreateLookupTypeDto, UpdateLookupTypeDto } from './dto/lookup-type.dto';
+import {
+  CreateLookupTypeDto,
+  UpdateLookupTypeDto,
+} from './dto/lookup-type.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
@@ -44,9 +47,15 @@ export class LookupTypesController {
         type: 'object',
         properties: {
           id: { type: 'number', example: 1 },
-          uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          uuid: {
+            type: 'string',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
           typeName: { type: 'string', example: 'notification_status' },
-          description: { type: 'string', example: 'Status values for notifications' },
+          description: {
+            type: 'string',
+            example: 'Status values for notifications',
+          },
           isSystem: { type: 'boolean', example: true },
           createdAt: { type: 'string', example: '2026-01-08T00:00:00Z' },
           createdBy: { type: 'string', example: 'system' },
@@ -62,7 +71,8 @@ export class LookupTypesController {
   @Public()
   @ApiOperation({
     summary: 'Get all lookup types with their values',
-    description: 'Retrieve all lookup types along with their associated lookup values in one call',
+    description:
+      'Retrieve all lookup types along with their associated lookup values in one call',
   })
   @ApiResponse({
     status: 200,
@@ -73,9 +83,15 @@ export class LookupTypesController {
         type: 'object',
         properties: {
           id: { type: 'number', example: 1 },
-          uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          uuid: {
+            type: 'string',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
           typeName: { type: 'string', example: 'notification_status' },
-          description: { type: 'string', example: 'Status values for notifications' },
+          description: {
+            type: 'string',
+            example: 'Status values for notifications',
+          },
           isSystem: { type: 'boolean', example: true },
           createdAt: { type: 'string', example: '2026-01-08T00:00:00Z' },
           createdBy: { type: 'string', example: 'system' },
@@ -118,9 +134,15 @@ export class LookupTypesController {
       type: 'object',
       properties: {
         id: { type: 'number', example: 1 },
-        uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        uuid: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         typeName: { type: 'string', example: 'notification_status' },
-        description: { type: 'string', example: 'Status values for notifications' },
+        description: {
+          type: 'string',
+          example: 'Status values for notifications',
+        },
         isSystem: { type: 'boolean', example: true },
         createdAt: { type: 'string', example: '2026-01-08T00:00:00Z' },
         createdBy: { type: 'string', example: 'system' },
@@ -139,7 +161,8 @@ export class LookupTypesController {
   @Public()
   @ApiOperation({
     summary: 'Get lookup type with values by type name',
-    description: 'Retrieve a lookup type along with all its associated lookup values',
+    description:
+      'Retrieve a lookup type along with all its associated lookup values',
   })
   @ApiParam({
     name: 'typeName',
@@ -154,9 +177,15 @@ export class LookupTypesController {
       type: 'object',
       properties: {
         id: { type: 'number', example: 1 },
-        uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        uuid: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         typeName: { type: 'string', example: 'notification_status' },
-        description: { type: 'string', example: 'Status values for notifications' },
+        description: {
+          type: 'string',
+          example: 'Status values for notifications',
+        },
         isSystem: { type: 'boolean', example: true },
         createdAt: { type: 'string', example: '2026-01-08T00:00:00Z' },
         createdBy: { type: 'string', example: 'system' },
@@ -168,7 +197,10 @@ export class LookupTypesController {
               id: { type: 'number', example: 1 },
               code: { type: 'string', example: 'pending' },
               displayName: { type: 'string', example: 'Pending' },
-              description: { type: 'string', example: 'Notification is pending' },
+              description: {
+                type: 'string',
+                example: 'Notification is pending',
+              },
               sortOrder: { type: 'number', example: 1 },
               isActive: { type: 'boolean', example: true },
               metadata: { type: 'object', example: { color: 'yellow' } },
@@ -189,7 +221,8 @@ export class LookupTypesController {
   @Post()
   @ApiOperation({
     summary: 'Create a new lookup type',
-    description: 'Create a new lookup type (admin only). System lookup types can only be created by administrators.',
+    description:
+      'Create a new lookup type (admin only). System lookup types can only be created by administrators.',
   })
   @ApiResponse({
     status: 201,
@@ -198,7 +231,10 @@ export class LookupTypesController {
       type: 'object',
       properties: {
         id: { type: 'number', example: 10 },
-        uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        uuid: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         typeName: { type: 'string', example: 'order_status' },
         description: { type: 'string', example: 'Status values for orders' },
         isSystem: { type: 'boolean', example: false },
@@ -219,7 +255,10 @@ export class LookupTypesController {
     status: 409,
     description: 'Conflict - lookup type already exists',
   })
-  create(@Body() createDto: CreateLookupTypeDto, @CurrentUser() user: UserContext) {
+  create(
+    @Body() createDto: CreateLookupTypeDto,
+    @CurrentUser() user: UserContext,
+  ) {
     return this.lookupsService.createType(createDto, user.sub);
   }
 
@@ -241,7 +280,10 @@ export class LookupTypesController {
       type: 'object',
       properties: {
         id: { type: 'number', example: 1 },
-        uuid: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        uuid: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         typeName: { type: 'string', example: 'order_status' },
         description: { type: 'string', example: 'Updated description' },
         isSystem: { type: 'boolean', example: false },
@@ -272,7 +314,8 @@ export class LookupTypesController {
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete a lookup type',
-    description: 'Delete a lookup type (admin only). Can only delete if no lookup values reference this type.',
+    description:
+      'Delete a lookup type (admin only). Can only delete if no lookup values reference this type.',
   })
   @ApiParam({
     name: 'id',
@@ -286,7 +329,10 @@ export class LookupTypesController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Lookup type deleted successfully' },
+        message: {
+          type: 'string',
+          example: 'Lookup type deleted successfully',
+        },
         type: {
           type: 'object',
           properties: {
@@ -299,7 +345,8 @@ export class LookupTypesController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Bad request - cannot delete type with associated lookup values',
+    description:
+      'Bad request - cannot delete type with associated lookup values',
   })
   @ApiResponse({
     status: 401,

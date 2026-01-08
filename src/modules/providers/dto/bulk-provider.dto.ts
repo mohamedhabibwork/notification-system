@@ -1,13 +1,13 @@
 /**
  * Bulk Provider Operation DTOs
- * 
+ *
  * DTOs for bulk create, update, delete, and validation operations
  */
 
-import { 
-  IsArray, 
-  IsNumber, 
-  IsOptional, 
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
   ValidateNested,
   ArrayMinSize,
   IsBoolean,
@@ -86,7 +86,10 @@ export class ValidateProviderResponseDto {
   @ApiProperty({ description: 'Validation message', required: false })
   message?: string;
 
-  @ApiProperty({ description: 'Error details if validation failed', required: false })
+  @ApiProperty({
+    description: 'Error details if validation failed',
+    required: false,
+  })
   error?: string;
 
   @ApiProperty({ description: 'Timestamp of validation' })
@@ -109,7 +112,10 @@ export class ProviderHealthResponseDto {
   @ApiProperty({ description: 'Whether the provider is healthy' })
   isHealthy: boolean;
 
-  @ApiProperty({ description: 'Response time in milliseconds', required: false })
+  @ApiProperty({
+    description: 'Response time in milliseconds',
+    required: false,
+  })
   responseTime?: number;
 
   @ApiProperty({ description: 'Health check message' })

@@ -5,13 +5,11 @@
  * Maintains a registry of available providers and creates instances on demand.
  */
 
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   IProvider,
   IProviderCredentials,
 } from '../interfaces/provider.interface';
-import { SessionManagerService } from '../implementations/whatsapp/session-manager.service';
-import { WPPConnectProvider } from '../implementations/whatsapp/wppconnect.provider';
 
 type ProviderConstructor<
   T extends IProviderCredentials = IProviderCredentials,
@@ -21,11 +19,6 @@ type ProviderConstructor<
 export class ProviderFactory {
   private readonly logger = new Logger(ProviderFactory.name);
   private readonly providers = new Map<string, ProviderConstructor>();
-
-  constructor(
-    @Inject(forwardRef(() => SessionManagerService))
-    private readonly sessionManager: SessionManagerService,
-  ) {}
 
   /**
    * Register a provider class
@@ -60,12 +53,6 @@ export class ProviderFactory {
     }
 
     const provider = new ProviderClass(credentials) as IProvider<T>;
-
-    // Special handling for WPPConnectProvider - inject SessionManager
-    if (provider instanceof WPPConnectProvider) {
-      provider.setSessionManager(this.sessionManager);
-    }
-
     return provider;
   }
 

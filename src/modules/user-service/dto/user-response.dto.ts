@@ -5,6 +5,7 @@ export interface UserResponseDto {
   firstName?: string;
   lastName?: string;
   userType?: string;
+  timezone?: string; // IANA timezone (e.g., 'America/New_York', 'Europe/London')
   metadata?: Record<string, unknown>;
   preferences?: {
     emailEnabled?: boolean;

@@ -617,7 +617,8 @@ export class TemplatesService {
     tenantId?: number,
   ): Promise<Array<typeof notificationTemplates.$inferSelect>> {
     // First, get the provider to know its channel
-    const { notificationProviders } = await import('../../database/schema/index.js');
+    const { notificationProviders } =
+      await import('../../database/schema/index.js');
     const [provider] = await this.db
       .select()
       .from(notificationProviders)
@@ -645,7 +646,7 @@ export class TemplatesService {
             // Template belongs to tenant or is a system template
             tenantId === 0
               ? eq(notificationTemplates.tenantId, 0)
-              : undefined as any,
+              : (undefined as any),
           ),
         );
     }
@@ -653,7 +654,7 @@ export class TemplatesService {
     return await this.db
       .select()
       .from(notificationTemplates)
-      .where(and(...conditions as any));
+      .where(and(...(conditions as any)));
   }
 
   /**
@@ -690,7 +691,8 @@ export class TemplatesService {
     }
 
     // Get provider
-    const { notificationProviders } = await import('../../database/schema/index.js');
+    const { notificationProviders } =
+      await import('../../database/schema/index.js');
     const [provider] = await this.db
       .select()
       .from(notificationProviders)
@@ -789,7 +791,8 @@ export class TemplatesService {
     providerId: number,
   ): Promise<Array<typeof notificationTemplates.$inferSelect>> {
     // Get provider
-    const { notificationProviders } = await import('../../database/schema/index.js');
+    const { notificationProviders } =
+      await import('../../database/schema/index.js');
     const [provider] = await this.db
       .select()
       .from(notificationProviders)

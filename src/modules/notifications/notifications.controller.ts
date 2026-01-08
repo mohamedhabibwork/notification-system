@@ -19,6 +19,8 @@ import {
   SendBatchDto,
   SendChunkDto,
 } from './dto/send-notification.dto';
+import { BroadcastNotificationDto } from './dto/broadcast-notification.dto';
+import { SendMultiDto } from './dto/send-multi.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
@@ -66,6 +68,38 @@ export class NotificationsController {
   @ApiResponse({ status: 202, description: 'Chunk queued successfully' })
   sendChunk(@Body() dto: SendChunkDto, @CurrentUser() user: UserContext) {
     return this.notificationsService.sendChunk(dto, user.sub);
+  }
+
+  @Post('broadcast')
+  @Scopes('notification:send')
+  @ApiOperation({
+    summary:
+      'Send notification to multiple channels simultaneously (e.g., email + SMS + database)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Broadcast completed with results for each channel',
+  })
+  sendBroadcast(
+    @Body() dto: BroadcastNotificationDto,
+    @CurrentUser() user: UserContext,
+  ) {
+    return this.notificationsService.sendBroadcast(dto, user.sub);
+  }
+
+  @Post('send-multi')
+  @Scopes('notification:send')
+  @ApiOperation({
+    summary: 'Send notifications to multiple users across multiple channels',
+    description:
+      'Supports timezone handling and provider fallback chains for bulk multi-channel notifications',
+  })
+  @ApiResponse({
+    status: 202,
+    description: 'Multi-user notifications queued successfully',
+  })
+  sendMulti(@Body() dto: SendMultiDto, @CurrentUser() user: UserContext) {
+    return this.notificationsService.sendMulti(dto, user.sub);
   }
 
   @Get('batches/:batchId')

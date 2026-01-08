@@ -8,9 +8,13 @@ import { NotificationsService } from './notifications.service';
 import { NotificationValidatorService } from './services/notification-validator.service';
 import { UserEnrichmentService } from './services/user-enrichment.service';
 import { NotificationProcessorService } from './services/notification-processor.service';
+import { MultiNotificationService } from './services/multi-notification.service';
+import { TimezoneService } from './services/timezone.service';
+import { ProviderFallbackService } from './services/provider-fallback.service';
 import { TemplatesModule } from '../templates/templates.module';
 import { UserServiceModule } from '../user-service/user-service.module';
 import { EventsModule } from '../events/events.module';
+import { ProviderModule } from '../../common/providers/provider.module';
 
 @Module({
   imports: [
@@ -24,6 +28,7 @@ import { EventsModule } from '../events/events.module';
     TemplatesModule,
     UserServiceModule,
     EventsModule,
+    ProviderModule,
   ],
   controllers: [NotificationsController, AdminNotificationsController],
   providers: [
@@ -31,6 +36,9 @@ import { EventsModule } from '../events/events.module';
     NotificationValidatorService,
     UserEnrichmentService,
     NotificationProcessorService,
+    MultiNotificationService,
+    TimezoneService,
+    ProviderFallbackService,
   ],
   exports: [NotificationsService],
 })

@@ -1,12 +1,12 @@
 /**
  * Bulk Template Operation DTOs
- * 
+ *
  * DTOs for bulk create and update operations on templates
  */
 
-import { 
-  IsArray, 
-  IsNumber, 
+import {
+  IsArray,
+  IsNumber,
   ValidateNested,
   ArrayMinSize,
 } from 'class-validator';

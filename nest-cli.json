@@ -7,11 +7,11 @@
     "assets": [
       {
         "include": "modules/templates/html-templates/**/*.hbs",
-        "outDir": "dist/src"
+        "outDir": "dist"
       },
       {
         "include": "modules/templates/html-templates/**/*.md",
-        "outDir": "dist/src"
+        "outDir": "dist"
       }
     ],
     "watchAssets": true

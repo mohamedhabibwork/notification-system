@@ -57,6 +57,81 @@ export interface BaseIoTCredentials extends IProviderCredentials {
   channel: 'iot';
 }
 
+export interface BaseDatabaseCredentials extends IProviderCredentials {
+  channel: 'database';
+}
+
+export interface BaseWebSocketCredentials extends IProviderCredentials {
+  channel: 'websocket';
+}
+
+export interface BaseWebSocketCredentialsCommon extends BaseWebSocketCredentials {
+  mode: 'internal' | 'external';
+
+  // Channel/Room configuration
+  supportChannelBroadcast?: boolean; // Enable broadcasting to channels
+  defaultChannels?: string[]; // Auto-join these channels
+}
+
+export interface InternalWebSocketCredentials extends BaseWebSocketCredentialsCommon {
+  providerType: 'websocket';
+  mode: 'internal';
+  // Uses existing NotificationGateway - no additional config needed
+}
+
+export interface ExternalWebSocketCredentials extends BaseWebSocketCredentialsCommon {
+  providerType: 'websocket';
+  mode: 'external';
+  protocol: 'ws' | 'socketio'; // Which protocol to use
+  url: string; // WebSocket server URL
+
+  // Authentication
+  authType?: 'none' | 'bearer' | 'basic' | 'query' | 'custom';
+  authToken?: string;
+  username?: string;
+  password?: string;
+  authQuery?: Record<string, string>;
+  authHeaders?: Record<string, string>;
+
+  // Connection options
+  reconnection?: boolean; // Auto-reconnect on disconnect (default: true)
+  reconnectionAttempts?: number; // Max retry attempts (default: 5)
+  reconnectionDelay?: number; // Delay between retries in ms (default: 1000)
+  timeout?: number; // Connection timeout in ms (default: 20000)
+
+  // Features
+  room?: string; // Join specific room/channel (deprecated, use defaultChannels)
+  enableCompression?: boolean; // Enable message compression
+  enableAcknowledgments?: boolean; // Wait for message confirmation
+  customEvents?: {
+    notification?: string; // Custom event name for notifications
+    connect?: string;
+    disconnect?: string;
+    channelBroadcast?: string; // Event for channel broadcasts
+    incomingMessage?: string; // Event to listen for incoming messages
+  };
+
+  // Bidirectional communication
+  enableReceiving?: boolean; // Listen for incoming messages
+  subscribeToEvents?: string[]; // Events to subscribe to
+  messageHandling?: {
+    strategy: 'callback' | 'database' | 'kafka' | 'all'; // How to handle incoming messages
+    callbackUrl?: string; // Webhook URL for callbacks
+    storeInDatabase?: boolean; // Store in notifications table
+    publishToKafka?: boolean; // Publish to Kafka
+    kafkaTopic?: string; // Kafka topic for incoming messages
+  };
+
+  // Request-Response pattern
+  enableRequestResponse?: boolean; // Support query/response operations
+  requestTimeout?: number; // Timeout for request-response in ms (default: 5000)
+
+  // Advanced
+  transports?: string[]; // socket.io transport methods
+  path?: string; // socket.io path (default: /socket.io)
+  extraHeaders?: Record<string, string>;
+}
+
 // ============================================================================
 // Email Provider Credentials
 // ============================================================================
@@ -120,6 +195,14 @@ export interface APNCredentials extends BaseFcmCredentials {
   bundleId: string;
   privateKey: string;
   production: boolean;
+}
+
+export interface HuaweiPushKitCredentials extends BaseFcmCredentials {
+  providerType: 'huawei-pushkit';
+  appId: string;
+  appSecret: string;
+  clientId: string;
+  clientSecret: string;
 }
 
 // ============================================================================
@@ -437,6 +520,16 @@ export interface OneBotCredentials extends BaseIoTCredentials {
 }
 
 // ============================================================================
+// Database Provider Credentials
+// ============================================================================
+
+export interface DatabaseInboxCredentials extends BaseDatabaseCredentials {
+  providerType: 'database-inbox';
+  tableName?: string; // optional, defaults to 'user_notifications'
+  retentionDays?: number; // optional, defaults to 90
+}
+
+// ============================================================================
 // Aggregator Provider Credentials
 // ============================================================================
 
@@ -474,7 +567,10 @@ export type SmsProviderCredentials =
   | OctopushCredentials
   | SMSEagleCredentials;
 
-export type FcmProviderCredentials = FirebaseCredentials | APNCredentials;
+export type FcmProviderCredentials =
+  | FirebaseCredentials
+  | APNCredentials
+  | HuaweiPushKitCredentials;
 
 export type WhatsAppProviderCredentials =
   | WhatsAppBusinessCredentials
@@ -526,6 +622,12 @@ export type IoTProviderCredentials =
   | NostrCredentials
   | OneBotCredentials;
 
+export type DatabaseProviderCredentials = DatabaseInboxCredentials;
+
+export type WebSocketProviderCredentials =
+  | InternalWebSocketCredentials
+  | ExternalWebSocketCredentials;
+
 export type AllProviderCredentials =
   | EmailProviderCredentials
   | SmsProviderCredentials
@@ -537,4 +639,6 @@ export type AllProviderCredentials =
   | AlertProviderCredentials
   | WebhookProviderCredentials
   | IoTProviderCredentials
+  | DatabaseProviderCredentials
+  | WebSocketProviderCredentials
   | AppriseCredentials;

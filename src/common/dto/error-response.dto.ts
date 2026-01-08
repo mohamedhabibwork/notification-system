@@ -46,7 +46,8 @@ export class ErrorResponseDto {
  */
 export class ValidationErrorResponseDto extends ErrorResponseDto {
   @ApiProperty({
-    description: 'Validation errors grouped by field name with arrays of error messages',
+    description:
+      'Validation errors grouped by field name with arrays of error messages',
     example: {
       name: ['name must be a string', 'name should not be empty'],
       'recipient.email': ['recipient.email must be an email address'],

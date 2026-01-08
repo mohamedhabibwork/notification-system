@@ -58,6 +58,8 @@ export const notifications = pgTable(
     failureReason: varchar('failure_reason', { length: 1000 }),
     retryCount: integer('retry_count').default(0).notNull(),
     bulkJobId: bigint('bulk_job_id', { mode: 'number' }), // for CSV bulk jobs
+    providerAttempts: jsonb('provider_attempts').$type<any[]>(), // Track provider fallback attempts
+    resolvedTimezone: varchar('resolved_timezone', { length: 50 }), // User's resolved timezone for scheduled notifications
     metadata: jsonb('metadata').$type<Record<string, unknown>>(), // campaignId, source, etc
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()

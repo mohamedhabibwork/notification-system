@@ -1,0 +1,68 @@
+{
+  "topics": [
+    {
+      "name": "notification.requested",
+      "partitions": 10,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000",
+        "compression.type": "snappy"
+      }
+    },
+    {
+      "name": "notification.email.requested",
+      "partitions": 5,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000"
+      }
+    },
+    {
+      "name": "notification.sms.requested",
+      "partitions": 5,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000"
+      }
+    },
+    {
+      "name": "notification.fcm.requested",
+      "partitions": 5,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000"
+      }
+    },
+    {
+      "name": "notification.whatsapp.requested",
+      "partitions": 5,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "604800000"
+      }
+    },
+    {
+      "name": "notification.status.updated",
+      "partitions": 10,
+      "replicationFactor": 1,
+      "config": {
+        "retention.ms": "2592000000"
+      }
+    },
+    {
+      "name": "template.created",
+      "partitions": 3,
+      "replicationFactor": 1
+    },
+    {
+      "name": "template.updated",
+      "partitions": 3,
+      "replicationFactor": 1
+    },
+    {
+      "name": "tenant.created",
+      "partitions": 3,
+      "replicationFactor": 1
+    }
+  ]
+}

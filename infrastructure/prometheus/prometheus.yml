@@ -1,0 +1,85 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'notification-system'
+    environment: 'development'
+
+scrape_configs:
+  # Notification Service (Local Development)
+  # Use host.docker.internal for Mac/Windows or 172.17.0.1 for Linux
+  - job_name: 'notification-service'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+        labels:
+          service: 'notification-core'
+          environment: 'development'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    
+  # Alternative for production with docker service name
+  # - job_name: 'notification-service-docker'
+  #   static_configs:
+  #     - targets: ['notification-service:3000']
+  #       labels:
+  #         service: 'notification-core'
+  #         environment: 'production'
+  #   metrics_path: '/metrics'
+  #   scrape_interval: 10s
+
+  # Email Workers
+  - job_name: 'email-worker'
+    static_configs:
+      - targets: ['email-worker:9090']
+        labels:
+          service: 'worker'
+          worker_type: 'email'
+    metrics_path: '/metrics'
+
+  # SMS Workers
+  - job_name: 'sms-worker'
+    static_configs:
+      - targets: ['sms-worker:9090']
+        labels:
+          service: 'worker'
+          worker_type: 'sms'
+    metrics_path: '/metrics'
+
+  # FCM Workers
+  - job_name: 'fcm-worker'
+    static_configs:
+      - targets: ['fcm-worker:9090']
+        labels:
+          service: 'worker'
+          worker_type: 'fcm'
+    metrics_path: '/metrics'
+
+  # WhatsApp Workers
+  - job_name: 'whatsapp-worker'
+    static_configs:
+      - targets: ['whatsapp-worker:9090']
+        labels:
+          service: 'worker'
+          worker_type: 'whatsapp'
+    metrics_path: '/metrics'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter (if running)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    metrics_path: '/metrics'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: 
+          # Uncomment to enable alert manager
+          # - 'alertmanager:9093'
+
+rule_files:
+  - 'alerts/*.yml'

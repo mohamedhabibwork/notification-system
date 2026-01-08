@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package notification;
+
+service NotificationService {
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+  rpc GetNotificationStatus(GetStatusRequest) returns (NotificationStatusResponse);
+  rpc GetNotifications(GetNotificationsRequest) returns (GetNotificationsResponse);
+  rpc MarkAsRead(MarkAsReadRequest) returns (MarkAsReadResponse);
+  rpc StreamNotifications(StreamRequest) returns (stream NotificationEvent);
+}
+
+message SendNotificationRequest {
+  int64 tenant_id = 1;
+  string channel = 2;
+  Recipient recipient = 3;
+  int64 template_id = 4;
+  map<string, string> variables = 5;
+  string priority = 6;
+  DirectContent direct_content = 7;
+}
+
+message Recipient {
+  string user_id = 1;
+  string email = 2;
+  string phone = 3;
+  map<string, string> metadata = 4;
+}
+
+message DirectContent {
+  string subject = 1;
+  string body = 2;
+  string html_body = 3;
+}
+
+message SendNotificationResponse {
+  string notification_uuid = 1;
+  string status = 2;
+  int64 notification_id = 3;
+  string message = 4;
+}
+
+message GetStatusRequest {
+  string notification_uuid = 1;
+  int64 tenant_id = 2;
+}
+
+message NotificationStatusResponse {
+  int64 notification_id = 1;
+  string notification_uuid = 2;
+  string status = 3;
+  string channel = 4;
+  string sent_at = 5;
+  string delivered_at = 6;
+  string failed_at = 7;
+  string failure_reason = 8;
+}
+
+message GetNotificationsRequest {
+  int64 tenant_id = 1;
+  string user_id = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+  string status = 5;
+}
+
+message GetNotificationsResponse {
+  repeated NotificationItem notifications = 1;
+  int32 total = 2;
+}
+
+message NotificationItem {
+  int64 id = 1;
+  string uuid = 2;
+  string channel = 3;
+  string status = 4;
+  string subject = 5;
+  string body = 6;
+  string created_at = 7;
+  bool is_read = 8;
+}
+
+message MarkAsReadRequest {
+  string notification_uuid = 1;
+  int64 tenant_id = 2;
+  string user_id = 3;
+}
+
+message MarkAsReadResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message StreamRequest {
+  int64 tenant_id = 1;
+  string user_id = 2;
+}
+
+message NotificationEvent {
+  string event_type = 1;
+  string notification_uuid = 2;
+  string status = 3;
+  string timestamp = 4;
+  map<string, string> data = 5;
+}

@@ -1,0 +1,42 @@
+# Multi-stage Dockerfile for Workers
+
+# Base stage - dependencies only
+FROM node:18-alpine AS base
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+
+# Build stage - compile TypeScript
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Production stage - worker
+FROM node:18-alpine AS production
+WORKDIR /app
+
+# Copy dependencies from base
+COPY --from=base /app/node_modules ./node_modules
+
+# Copy compiled code from build
+COPY --from=build /app/dist ./dist
+
+# Copy necessary files
+COPY package*.json ./
+
+# Set environment
+ENV NODE_ENV=production
+ENV WORKER_TYPE=email
+
+# Health check - workers expose metrics on 9090
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "process.exit(0)"
+
+# Expose metrics port
+EXPOSE 9090
+
+# Start worker - specific worker determined by environment variable
+CMD ["sh", "-c", "node dist/src/processors/${WORKER_TYPE}.processor"]

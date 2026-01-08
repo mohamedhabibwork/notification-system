@@ -1,0 +1,18 @@
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4; border-top: 1px solid #eeeeee;">
+  <tr>
+    <td style="padding: 30px; text-align: center; color: #666666; font-size: 14px; line-height: 1.5;">
+      <p style="margin: 0 0 10px 0; font-weight: bold;">{{companyName}}</p>
+      {{#if companyAddress}}
+        <p style="margin: 0 0 10px 0;">{{companyAddress}}</p>
+      {{/if}}
+      {{#if unsubscribeUrl}}
+        <p style="margin: 10px 0 0 0;">
+          <a href="{{unsubscribeUrl}}" style="color: #666666; text-decoration: underline;">Unsubscribe</a>
+        </p>
+      {{/if}}
+      <p style="margin: 10px 0 0 0; font-size: 12px;">
+        &copy; {{year}} {{companyName}}. All rights reserved.
+      </p>
+    </td>
+  </tr>
+</table>

@@ -1,0 +1,185 @@
+groups:
+  - name: notification_system_alerts
+    interval: 30s
+    rules:
+      # High Error Rate Alert
+      - alert: HighNotificationFailureRate
+        expr: |
+          (
+            sum(rate(notifications_failed_total[5m]))
+            /
+            sum(rate(notifications_sent_total[5m]))
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High notification failure rate detected"
+          description: "More than 10% of notifications are failing (current: {{ $value | humanizePercentage }})"
+          
+      - alert: CriticalNotificationFailureRate
+        expr: |
+          (
+            sum(rate(notifications_failed_total[5m]))
+            /
+            sum(rate(notifications_sent_total[5m]))
+          ) > 0.25
+        for: 2m
+        labels:
+          severity: critical
+          service: notification-system
+        annotations:
+          summary: "Critical notification failure rate detected"
+          description: "More than 25% of notifications are failing (current: {{ $value | humanizePercentage }})"
+
+      # High API Latency Alert
+      - alert: HighAPILatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High API latency detected"
+          description: "P95 latency is above 1 second (current: {{ $value }}s)"
+
+      - alert: CriticalAPILatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 3
+        for: 2m
+        labels:
+          severity: critical
+          service: notification-system
+        annotations:
+          summary: "Critical API latency detected"
+          description: "P95 latency is above 3 seconds (current: {{ $value }}s)"
+
+      # Queue Depth Alert
+      - alert: HighQueueDepth
+        expr: |
+          sum(queue_depth) by (queue_name) > 1000
+        for: 10m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High queue depth detected"
+          description: "Queue {{ $labels.queue_name }} has {{ $value }} pending jobs"
+
+      - alert: CriticalQueueDepth
+        expr: |
+          sum(queue_depth) by (queue_name) > 5000
+        for: 5m
+        labels:
+          severity: critical
+          service: notification-system
+        annotations:
+          summary: "Critical queue depth detected"
+          description: "Queue {{ $labels.queue_name }} has {{ $value }} pending jobs - system may be overwhelmed"
+
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up{job="notification-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: notification-system
+        annotations:
+          summary: "Notification service is down"
+          description: "The notification service has been down for more than 1 minute"
+
+      # Circuit Breaker Open Alert
+      - alert: CircuitBreakerOpen
+        expr: circuit_breaker_state == 2
+        for: 5m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "Circuit breaker is open"
+          description: "Circuit breaker for {{ $labels.service_name }} has been open for 5 minutes"
+
+      # High HTTP Error Rate
+      - alert: HighHTTPErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "More than 5% of HTTP requests are returning 5xx errors (current: {{ $value | humanizePercentage }})"
+
+      # Low Notification Throughput (might indicate issues)
+      - alert: LowNotificationThroughput
+        expr: |
+          sum(rate(notifications_sent_total[10m])) < 0.1
+        for: 30m
+        labels:
+          severity: info
+          service: notification-system
+        annotations:
+          summary: "Low notification throughput"
+          description: "Notification throughput is unusually low ({{ $value }} notifications/sec)"
+
+      # Kafka Consumer Lag (if you're using Kafka)
+      - alert: HighKafkaConsumerLag
+        expr: |
+          sum(rate(kafka_messages_processed_total{status="failed"}[5m]))
+          /
+          sum(rate(kafka_messages_processed_total[5m]))
+          > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High Kafka message processing failure rate"
+          description: "More than 10% of Kafka messages are failing to process"
+
+      # Memory/Resource Alerts (if you add process metrics)
+      - alert: HighMemoryUsage
+        expr: |
+          process_resident_memory_bytes / 1024 / 1024 / 1024 > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High memory usage"
+          description: "Service is using more than 2GB of memory (current: {{ $value }}GB)"
+
+      # Provider-Specific Alerts
+      - alert: ProviderFailures
+        expr: |
+          sum(rate(notifications_failed_total[5m])) by (channel, error_type) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High failure rate for {{ $labels.channel }} provider"
+          description: "Channel {{ $labels.channel }} is experiencing failures (error: {{ $labels.error_type }})"
+
+      # Retry Storm Detection
+      - alert: HighRetryRate
+        expr: |
+          sum(rate(retry_attempts_total[5m])) by (operation_name) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: notification-system
+        annotations:
+          summary: "High retry rate detected"
+          description: "Operation {{ $labels.operation_name }} is retrying frequently ({{ $value }} retries/sec)"

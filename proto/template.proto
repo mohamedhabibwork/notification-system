@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package template;
+
+service TemplateService {
+  rpc CreateTemplate(CreateTemplateRequest) returns (TemplateResponse);
+  rpc GetTemplate(GetTemplateRequest) returns (TemplateResponse);
+  rpc UpdateTemplate(UpdateTemplateRequest) returns (TemplateResponse);
+  rpc DeleteTemplate(DeleteTemplateRequest) returns (DeleteResponse);
+  rpc ListTemplates(ListTemplatesRequest) returns (ListTemplatesResponse);
+  rpc PreviewTemplate(PreviewTemplateRequest) returns (PreviewTemplateResponse);
+}
+
+message CreateTemplateRequest {
+  int64 tenant_id = 1;
+  string name = 2;
+  string template_code = 3;
+  string channel = 4;
+  string subject = 5;
+  string body_template = 6;
+  string html_template = 7;
+  map<string, string> variables = 8;
+  string language = 9;
+  bool is_active = 10;
+  int64 category_id = 11;
+  repeated string tags = 12;
+}
+
+message UpdateTemplateRequest {
+  int64 template_id = 1;
+  int64 tenant_id = 2;
+  string name = 3;
+  string subject = 4;
+  string body_template = 5;
+  string html_template = 6;
+  bool is_active = 7;
+  repeated string tags = 8;
+}
+
+message GetTemplateRequest {
+  int64 template_id = 1;
+  int64 tenant_id = 2;
+}
+
+message DeleteTemplateRequest {
+  int64 template_id = 1;
+  int64 tenant_id = 2;
+}
+
+message ListTemplatesRequest {
+  int64 tenant_id = 1;
+  string channel = 2;
+  int64 category_id = 3;
+  string language = 4;
+  int32 limit = 5;
+  int32 offset = 6;
+}
+
+message TemplateResponse {
+  int64 id = 1;
+  string uuid = 2;
+  string name = 3;
+  string template_code = 4;
+  string channel = 5;
+  string subject = 6;
+  string body_template = 7;
+  string html_template = 8;
+  bool is_active = 9;
+  int32 version = 10;
+  string created_at = 11;
+  string updated_at = 12;
+}
+
+message ListTemplatesResponse {
+  repeated TemplateResponse templates = 1;
+  int32 total = 2;
+}
+
+message PreviewTemplateRequest {
+  int64 template_id = 1;
+  int64 tenant_id = 2;
+  map<string, string> variables = 3;
+}
+
+message PreviewTemplateResponse {
+  string subject = 1;
+  string body = 2;
+  string html_body = 3;
+}
+
+message DeleteResponse {
+  bool success = 1;
+  string message = 2;
+}

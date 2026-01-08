@@ -1,0 +1,72 @@
+<!-- Header -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td style="padding: 20px 30px; text-align: center; border-bottom: 1px solid #eeeeee;">
+      <h1 style="margin: 0; color: #333333; font-size: 24px;">{{companyName}}</h1>
+    </td>
+  </tr>
+</table>
+
+<!-- Hero -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #7C3AED;">
+  <tr>
+    <td style="padding: 40px 30px; text-align: center;">
+      <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: bold;">
+        Your Authentication Code
+      </h1>
+    </td>
+  </tr>
+</table>
+
+<!-- Content -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+  <tr>
+    <td style="padding: 30px; color: #333333; font-size: 16px; line-height: 1.6;">
+      <p style="margin: 0 0 16px 0;">Hello {{firstName}},</p>
+      
+      <p style="margin: 0 0 16px 0;">
+        Your two-factor authentication code is:
+      </p>
+      
+      <!-- 2FA Code Box -->
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f9fafb; border: 2px solid #7C3AED; border-radius: 8px; margin: 20px 0;">
+        <tr>
+          <td style="padding: 30px; text-align: center;">
+            <p style="font-size: 48px; font-weight: bold; letter-spacing: 0.3em; margin: 0; color: #7C3AED; font-family: 'Courier New', Courier, monospace;">
+              {{code}}
+            </p>
+          </td>
+        </tr>
+      </table>
+      
+      <p style="margin: 0 0 16px 0; color: #666666; font-size: 14px; text-align: center;">
+        This code will expire in {{expiryMinutes}} minutes.
+      </p>
+      
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #FEF3C7; border-left: 4px solid #F59E0B; border-radius: 4px; margin: 20px 0;">
+        <tr>
+          <td style="padding: 16px; color: #92400E; font-size: 14px;">
+            If you didn't request this code, please contact support immediately.
+          </td>
+        </tr>
+      </table>
+      
+      <p style="margin: 16px 0 0 0; color: #666666;">
+        Best regards,<br>
+        The {{companyName}} Team
+      </p>
+    </td>
+  </tr>
+</table>
+
+<!-- Footer -->
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4;">
+  <tr>
+    <td style="padding: 30px; text-align: center; color: #666666; font-size: 14px; line-height: 1.5;">
+      <p style="margin: 0 0 10px 0; font-weight: bold;">{{companyName}}</p>
+      <p style="margin: 10px 0 0 0; font-size: 12px;">
+        &copy; {{year}} {{companyName}}. All rights reserved.
+      </p>
+    </td>
+  </tr>
+</table>

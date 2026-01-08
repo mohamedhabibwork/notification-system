@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   integer,
@@ -19,14 +20,14 @@ export const notificationBatches = pgTable(
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
     batchId: uuid('batch_id').defaultRandom().unique().notNull(),
     batchToken: varchar('batch_token', { length: 255 }).notNull(), // for authentication
-    tenantId: bigserial('tenant_id', { mode: 'number' })
+    tenantId: bigint('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
     totalExpected: integer('total_expected'), // nullable, updated as chunks arrive
     totalSent: integer('total_sent').default(0).notNull(),
     totalDelivered: integer('total_delivered').default(0).notNull(),
     totalFailed: integer('total_failed').default(0).notNull(),
-    statusId: bigserial('status_id', { mode: 'number' }).references(
+    statusId: bigint('status_id', { mode: 'number' }).references(
       () => lookups.id,
     ), // batch_status
     createdBy: varchar('created_by', { length: 255 }).notNull(), // service name

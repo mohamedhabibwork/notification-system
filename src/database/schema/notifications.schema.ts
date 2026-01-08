@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
@@ -21,14 +22,14 @@ export const notifications = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    tenantId: bigserial('tenant_id', { mode: 'number' })
+    tenantId: bigint('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
     channel: varchar('channel', { length: 50 }).notNull(),
-    templateId: bigserial('template_id', { mode: 'number' }).references(
+    templateId: bigint('template_id', { mode: 'number' }).references(
       () => notificationTemplates.id,
     ),
-    batchId: bigserial('batch_id', { mode: 'number' }).references(
+    batchId: bigint('batch_id', { mode: 'number' }).references(
       () => notificationBatches.id,
     ), // for batch chunking
     recipientUserId: varchar('recipient_user_id', { length: 255 }).notNull(),
@@ -43,10 +44,10 @@ export const notifications = pgTable(
     templateVariables:
       jsonb('template_variables').$type<Record<string, unknown>>(),
     attachments: jsonb('attachments').$type<any[]>(),
-    statusId: bigserial('status_id', { mode: 'number' })
+    statusId: bigint('status_id', { mode: 'number' })
       .references(() => lookups.id)
       .notNull(), // notification_status
-    priorityId: bigserial('priority_id', { mode: 'number' }).references(
+    priorityId: bigint('priority_id', { mode: 'number' }).references(
       () => lookups.id,
     ), // notification_priority
     scheduledAt: timestamp('scheduled_at', { withTimezone: true }),
@@ -56,7 +57,7 @@ export const notifications = pgTable(
     failedAt: timestamp('failed_at', { withTimezone: true }),
     failureReason: varchar('failure_reason', { length: 1000 }),
     retryCount: integer('retry_count').default(0).notNull(),
-    bulkJobId: bigserial('bulk_job_id', { mode: 'number' }), // for CSV bulk jobs
+    bulkJobId: bigint('bulk_job_id', { mode: 'number' }), // for CSV bulk jobs
     metadata: jsonb('metadata').$type<Record<string, unknown>>(), // campaignId, source, etc
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()

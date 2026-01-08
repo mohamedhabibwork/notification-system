@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
@@ -13,7 +14,7 @@ import { notificationTemplates } from './notification-templates.schema';
 export const templateVersions = pgTable('template_versions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   uuid: uuid('uuid').defaultRandom().unique().notNull(),
-  templateId: bigserial('template_id', { mode: 'number' })
+  templateId: bigint('template_id', { mode: 'number' })
     .notNull()
     .references(() => notificationTemplates.id),
   version: integer('version').notNull(),

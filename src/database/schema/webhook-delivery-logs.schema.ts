@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
@@ -14,10 +15,10 @@ import { notifications } from './notifications.schema';
 export const webhookDeliveryLogs = pgTable('webhook_delivery_logs', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   uuid: uuid('uuid').defaultRandom().unique().notNull(),
-  webhookConfigId: bigserial('webhook_config_id', { mode: 'number' })
+  webhookConfigId: bigint('webhook_config_id', { mode: 'number' })
     .notNull()
     .references(() => webhookConfigurations.id),
-  notificationId: bigserial('notification_id', { mode: 'number' }).references(
+  notificationId: bigint('notification_id', { mode: 'number' }).references(
     () => notifications.id,
   ),
   eventType: varchar('event_type', { length: 100 }).notNull(),

@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
@@ -18,10 +19,10 @@ export const notificationLogs = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    notificationId: bigserial('notification_id', { mode: 'number' })
+    notificationId: bigint('notification_id', { mode: 'number' })
       .notNull()
       .references(() => notifications.id),
-    tenantId: bigserial('tenant_id', { mode: 'number' })
+    tenantId: bigint('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
     eventType: varchar('event_type', { length: 50 }).notNull(), // queued, sent, delivered, failed

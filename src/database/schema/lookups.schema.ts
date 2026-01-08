@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   integer,
@@ -14,7 +15,7 @@ import { lookupTypes } from './lookup-types.schema';
 export const lookups = pgTable('lookups', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   uuid: uuid('uuid').defaultRandom().unique().notNull(),
-  lookupTypeId: bigserial('lookup_type_id', { mode: 'number' })
+  lookupTypeId: bigint('lookup_type_id', { mode: 'number' })
     .notNull()
     .references(() => lookupTypes.id),
   code: varchar('code', { length: 100 }).unique().notNull(),

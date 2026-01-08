@@ -1,10 +1,12 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
   boolean,
+  integer,
   timestamp,
 } from 'drizzle-orm/pg-core';
 import { tenants } from './tenants.schema';
@@ -12,7 +14,7 @@ import { tenants } from './tenants.schema';
 export const templateCategories = pgTable('template_categories', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   uuid: uuid('uuid').defaultRandom().unique().notNull(),
-  tenantId: bigserial('tenant_id', { mode: 'number' })
+  tenantId: bigint('tenant_id', { mode: 'number' })
     .notNull()
     .references(() => tenants.id),
   name: varchar('name', { length: 255 }).notNull(),
@@ -21,7 +23,7 @@ export const templateCategories = pgTable('template_categories', {
   icon: varchar('icon', { length: 100 }),
   color: varchar('color', { length: 50 }),
   isActive: boolean('is_active').default(true).notNull(),
-  sortOrder: bigserial('sort_order', { mode: 'number' }).default(0),
+  sortOrder: integer('sort_order').default(0).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true })
     .defaultNow()
     .notNull(),

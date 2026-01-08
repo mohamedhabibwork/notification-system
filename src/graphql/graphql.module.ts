@@ -54,11 +54,27 @@ export class GraphqlConfigModule {
                 };
               },
               formatError: (error: any) => {
-                return {
+                const formattedError: any = {
                   message: error.message,
                   code: error.extensions?.code || 'INTERNAL_SERVER_ERROR',
                   path: error.path,
                 };
+
+                // Include validation errors if present
+                if (
+                  error.extensions?.exception?.response?.errors ||
+                  error.extensions?.response?.errors
+                ) {
+                  const errors =
+                    error.extensions?.exception?.response?.errors ||
+                    error.extensions?.response?.errors;
+                  formattedError.extensions = {
+                    ...formattedError.extensions,
+                    validationErrors: errors,
+                  };
+                }
+
+                return formattedError;
               },
               subscriptions: {
                 'graphql-ws': {

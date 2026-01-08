@@ -1,10 +1,12 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
   boolean,
+  integer,
   jsonb,
   timestamp,
   unique,
@@ -16,7 +18,7 @@ export const webhookConfigurations = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    tenantId: bigserial('tenant_id', { mode: 'number' })
+    tenantId: bigint('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
     name: varchar('name', { length: 255 }).notNull(),
@@ -49,7 +51,7 @@ export const webhookConfigurations = pgTable(
         'notification.failed',
         'notification.read',
       ]),
-    timeoutMs: bigserial('timeout_ms', { mode: 'number' }).default(10000),
+    timeoutMs: integer('timeout_ms').default(10000).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),

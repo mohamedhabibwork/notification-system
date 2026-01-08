@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   boolean,
@@ -17,7 +18,7 @@ export const notificationPreferences = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    tenantId: bigserial('tenant_id', { mode: 'number' })
+    tenantId: bigint('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
     userId: varchar('user_id', { length: 255 }).notNull(),

@@ -1,11 +1,23 @@
-CREATE ROLE "anon";--> statement-breakpoint
-CREATE ROLE "authenticated";--> statement-breakpoint
-CREATE ROLE "service_role";--> statement-breakpoint
+DO $$ BEGIN
+  CREATE ROLE "anon";
+EXCEPTION WHEN duplicate_object THEN
+  NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE ROLE "authenticated";
+EXCEPTION WHEN duplicate_object THEN
+  NULL;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+  CREATE ROLE "service_role";
+EXCEPTION WHEN duplicate_object THEN
+  NULL;
+END $$;--> statement-breakpoint
 CREATE TABLE "bulk_notification_items" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"bulk_job_id" bigserial NOT NULL,
-	"notification_id" bigserial NOT NULL,
+	"bulk_job_id" bigint NOT NULL,
+	"notification_id" bigint,
 	"row_number" integer NOT NULL,
 	"csv_data" jsonb,
 	"status" varchar(50) NOT NULL,
@@ -19,7 +31,7 @@ ALTER TABLE "bulk_notification_items" ENABLE ROW LEVEL SECURITY;--> statement-br
 CREATE TABLE "bulk_notification_jobs" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"tenant_id" bigserial NOT NULL,
+	"tenant_id" bigint NOT NULL,
 	"job_name" varchar(255) NOT NULL,
 	"source_type" varchar(50) NOT NULL,
 	"file_path" varchar(1000),
@@ -40,6 +52,22 @@ CREATE TABLE "bulk_notification_jobs" (
 );
 --> statement-breakpoint
 ALTER TABLE "bulk_notification_jobs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE TABLE "feature_flags" (
+	"id" bigserial PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"description" text,
+	"is_enabled" boolean DEFAULT false NOT NULL,
+	"tenant_id" bigint,
+	"configuration" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_by" varchar(255),
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_by" varchar(255),
+	CONSTRAINT "feature_flags_uuid_unique" UNIQUE("uuid"),
+	CONSTRAINT "feature_flags_name_unique" UNIQUE("name")
+);
+--> statement-breakpoint
 CREATE TABLE "lookup_types" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
@@ -55,7 +83,7 @@ CREATE TABLE "lookup_types" (
 CREATE TABLE "lookups" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"lookup_type_id" bigserial NOT NULL,
+	"lookup_type_id" bigint NOT NULL,
 	"code" varchar(100) NOT NULL,
 	"display_name" varchar(255) NOT NULL,
 	"description" varchar(500),
@@ -75,12 +103,12 @@ CREATE TABLE "notification_batches" (
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"batch_id" uuid DEFAULT gen_random_uuid() NOT NULL,
 	"batch_token" varchar(255) NOT NULL,
-	"tenant_id" bigserial NOT NULL,
+	"tenant_id" bigint NOT NULL,
 	"total_expected" integer,
 	"total_sent" integer DEFAULT 0 NOT NULL,
 	"total_delivered" integer DEFAULT 0 NOT NULL,
 	"total_failed" integer DEFAULT 0 NOT NULL,
-	"status_id" bigserial NOT NULL,
+	"status_id" bigint,
 	"created_by" varchar(255) NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -93,8 +121,8 @@ ALTER TABLE "notification_batches" ENABLE ROW LEVEL SECURITY;--> statement-break
 CREATE TABLE "notification_logs" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"notification_id" bigserial NOT NULL,
-	"tenant_id" bigserial NOT NULL,
+	"notification_id" bigint NOT NULL,
+	"tenant_id" bigint NOT NULL,
 	"event_type" varchar(50) NOT NULL,
 	"provider_name" varchar(100),
 	"provider_message_id" varchar(255),
@@ -110,7 +138,7 @@ ALTER TABLE "notification_logs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoi
 CREATE TABLE "notification_preferences" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"tenant_id" bigserial NOT NULL,
+	"tenant_id" bigint NOT NULL,
 	"user_id" varchar(255) NOT NULL,
 	"channel" varchar(50) NOT NULL,
 	"is_enabled" boolean DEFAULT true NOT NULL,
@@ -126,7 +154,7 @@ ALTER TABLE "notification_preferences" ENABLE ROW LEVEL SECURITY;--> statement-b
 CREATE TABLE "notification_providers" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"tenant_id" bigserial NOT NULL,
+	"tenant_id" bigint NOT NULL,
 	"channel" varchar(50) NOT NULL,
 	"provider_name" varchar(100) NOT NULL,
 	"credentials" jsonb NOT NULL,
@@ -145,15 +173,18 @@ ALTER TABLE "notification_providers" ENABLE ROW LEVEL SECURITY;--> statement-bre
 CREATE TABLE "notification_templates" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"tenant_id" bigserial NOT NULL,
+	"tenant_id" bigint NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"template_code" varchar(100) NOT NULL,
-	"template_type_id" bigserial NOT NULL,
+	"template_type_id" bigint,
+	"category_id" bigint,
+	"parent_template_id" bigint,
 	"channel" varchar(50) NOT NULL,
 	"subject" varchar(500),
 	"body_template" text NOT NULL,
 	"html_template" text,
 	"variables" jsonb,
+	"tags" jsonb DEFAULT '[]',
 	"language" varchar(10) DEFAULT 'en',
 	"version" integer DEFAULT 1 NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
@@ -170,10 +201,10 @@ ALTER TABLE "notification_templates" ENABLE ROW LEVEL SECURITY;--> statement-bre
 CREATE TABLE "notifications" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
-	"tenant_id" bigserial NOT NULL,
+	"tenant_id" bigint NOT NULL,
 	"channel" varchar(50) NOT NULL,
-	"template_id" bigserial NOT NULL,
-	"batch_id" bigserial NOT NULL,
+	"template_id" bigint,
+	"batch_id" bigint,
 	"recipient_user_id" varchar(255) NOT NULL,
 	"recipient_user_type" varchar(100),
 	"recipient_email" varchar(255),
@@ -184,8 +215,8 @@ CREATE TABLE "notifications" (
 	"html_body" text,
 	"template_variables" jsonb,
 	"attachments" jsonb,
-	"status_id" bigserial NOT NULL,
-	"priority_id" bigserial NOT NULL,
+	"status_id" bigint NOT NULL,
+	"priority_id" bigint,
 	"scheduled_at" timestamp with time zone,
 	"sent_at" timestamp with time zone,
 	"delivered_at" timestamp with time zone,
@@ -193,7 +224,7 @@ CREATE TABLE "notifications" (
 	"failed_at" timestamp with time zone,
 	"failure_reason" varchar(1000),
 	"retry_count" integer DEFAULT 0 NOT NULL,
-	"bulk_job_id" bigserial NOT NULL,
+	"bulk_job_id" bigint,
 	"metadata" jsonb,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"created_by" varchar(255),
@@ -204,6 +235,58 @@ CREATE TABLE "notifications" (
 );
 --> statement-breakpoint
 ALTER TABLE "notifications" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+CREATE TABLE "template_categories" (
+	"id" bigserial PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"tenant_id" bigint NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"code" varchar(100) NOT NULL,
+	"description" text,
+	"icon" varchar(100),
+	"color" varchar(50),
+	"is_active" boolean DEFAULT true NOT NULL,
+	"sort_order" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_by" varchar(255),
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_by" varchar(255),
+	"deleted_at" timestamp with time zone,
+	CONSTRAINT "template_categories_uuid_unique" UNIQUE("uuid")
+);
+--> statement-breakpoint
+CREATE TABLE "template_localizations" (
+	"id" bigserial PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"template_id" bigint NOT NULL,
+	"language" varchar(10) NOT NULL,
+	"subject" varchar(500),
+	"body_template" text NOT NULL,
+	"html_template" text,
+	"translated_by" varchar(255),
+	"reviewed_by" varchar(255),
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "template_localizations_uuid_unique" UNIQUE("uuid"),
+	CONSTRAINT "template_language_unique" UNIQUE("template_id","language")
+);
+--> statement-breakpoint
+CREATE TABLE "template_versions" (
+	"id" bigserial PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"template_id" bigint NOT NULL,
+	"version" integer NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"subject" varchar(500),
+	"body_template" text NOT NULL,
+	"html_template" text,
+	"variables" jsonb,
+	"change_description" text,
+	"change_type" varchar(50),
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_by" varchar(255),
+	CONSTRAINT "template_versions_uuid_unique" UNIQUE("uuid")
+);
+--> statement-breakpoint
 CREATE TABLE "tenants" (
 	"id" bigserial PRIMARY KEY NOT NULL,
 	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
@@ -220,9 +303,51 @@ CREATE TABLE "tenants" (
 	CONSTRAINT "tenants_domain_unique" UNIQUE("domain")
 );
 --> statement-breakpoint
+CREATE TABLE "webhook_configurations" (
+	"id" bigserial PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"tenant_id" bigint NOT NULL,
+	"name" varchar(255) NOT NULL,
+	"webhook_url" varchar(500) NOT NULL,
+	"webhook_secret" text,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"retry_config" jsonb DEFAULT '{"maxRetries":3,"initialDelay":1000,"maxDelay":30000,"backoffStrategy":"exponential"}'::jsonb,
+	"event_overrides" jsonb DEFAULT '{}'::jsonb,
+	"headers" jsonb DEFAULT '{}'::jsonb,
+	"enabled_events" jsonb DEFAULT '["notification.queued","notification.sent","notification.delivered","notification.failed","notification.read"]'::jsonb,
+	"timeout_ms" integer DEFAULT 10000 NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"created_by" varchar(255),
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_by" varchar(255),
+	"deleted_at" timestamp with time zone,
+	CONSTRAINT "webhook_configurations_uuid_unique" UNIQUE("uuid"),
+	CONSTRAINT "webhook_tenant_name_unique" UNIQUE("tenant_id","name")
+);
+--> statement-breakpoint
+CREATE TABLE "webhook_delivery_logs" (
+	"id" bigserial PRIMARY KEY NOT NULL,
+	"uuid" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"webhook_config_id" bigint NOT NULL,
+	"notification_id" bigint,
+	"event_type" varchar(100) NOT NULL,
+	"webhook_url" varchar(500) NOT NULL,
+	"request_payload" jsonb,
+	"request_headers" jsonb,
+	"response_status_code" integer,
+	"response_body" text,
+	"response_time" integer,
+	"attempt_number" integer DEFAULT 1 NOT NULL,
+	"success" varchar(20) NOT NULL,
+	"error_message" text,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "webhook_delivery_logs_uuid_unique" UNIQUE("uuid")
+);
+--> statement-breakpoint
 ALTER TABLE "bulk_notification_items" ADD CONSTRAINT "bulk_notification_items_bulk_job_id_bulk_notification_jobs_id_fk" FOREIGN KEY ("bulk_job_id") REFERENCES "public"."bulk_notification_jobs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "bulk_notification_items" ADD CONSTRAINT "bulk_notification_items_notification_id_notifications_id_fk" FOREIGN KEY ("notification_id") REFERENCES "public"."notifications"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "bulk_notification_jobs" ADD CONSTRAINT "bulk_notification_jobs_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "feature_flags" ADD CONSTRAINT "feature_flags_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "lookups" ADD CONSTRAINT "lookups_lookup_type_id_lookup_types_id_fk" FOREIGN KEY ("lookup_type_id") REFERENCES "public"."lookup_types"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification_batches" ADD CONSTRAINT "notification_batches_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification_batches" ADD CONSTRAINT "notification_batches_status_id_lookups_id_fk" FOREIGN KEY ("status_id") REFERENCES "public"."lookups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -232,11 +357,18 @@ ALTER TABLE "notification_preferences" ADD CONSTRAINT "notification_preferences_
 ALTER TABLE "notification_providers" ADD CONSTRAINT "notification_providers_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification_templates" ADD CONSTRAINT "notification_templates_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notification_templates" ADD CONSTRAINT "notification_templates_template_type_id_lookups_id_fk" FOREIGN KEY ("template_type_id") REFERENCES "public"."lookups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "notification_templates" ADD CONSTRAINT "notification_templates_category_id_template_categories_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."template_categories"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_template_id_notification_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."notification_templates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_batch_id_notification_batches_id_fk" FOREIGN KEY ("batch_id") REFERENCES "public"."notification_batches"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_status_id_lookups_id_fk" FOREIGN KEY ("status_id") REFERENCES "public"."lookups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_priority_id_lookups_id_fk" FOREIGN KEY ("priority_id") REFERENCES "public"."lookups"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "template_categories" ADD CONSTRAINT "template_categories_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "template_localizations" ADD CONSTRAINT "template_localizations_template_id_notification_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."notification_templates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "template_versions" ADD CONSTRAINT "template_versions_template_id_notification_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."notification_templates"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "webhook_configurations" ADD CONSTRAINT "webhook_configurations_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "webhook_delivery_logs" ADD CONSTRAINT "webhook_delivery_logs_webhook_config_id_webhook_configurations_id_fk" FOREIGN KEY ("webhook_config_id") REFERENCES "public"."webhook_configurations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "webhook_delivery_logs" ADD CONSTRAINT "webhook_delivery_logs_notification_id_notifications_id_fk" FOREIGN KEY ("notification_id") REFERENCES "public"."notifications"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE POLICY "bulk_notification_items_tenant_isolation_policy" ON "bulk_notification_items" AS PERMISSIVE FOR ALL TO "authenticated" USING (EXISTS (
       SELECT 1 FROM bulk_notification_jobs 
       WHERE bulk_notification_jobs.id = bulk_notification_items.bulk_job_id 

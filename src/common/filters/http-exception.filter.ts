@@ -19,7 +19,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const exceptionResponse = exception.getResponse();
 
-    const errorResponse = {
+    const errorResponse: any = {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
@@ -33,6 +33,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
           ? (exceptionResponse as any).error
           : HttpStatus[status],
     };
+
+    // Preserve validation errors if present
+    if (
+      typeof exceptionResponse === 'object' &&
+      'errors' in exceptionResponse &&
+      exceptionResponse.errors
+    ) {
+      errorResponse.errors = exceptionResponse.errors;
+    }
 
     // Log error
     this.logger.error(`HTTP ${status} Error: ${errorResponse.message}`, {

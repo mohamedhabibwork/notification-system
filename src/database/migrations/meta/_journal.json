@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1767864526454,
-      "tag": "0000_lumpy_zaladane",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1767881092737,
-      "tag": "0001_lovely_the_captain",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1767882177237,
-      "tag": "0002_odd_franklin_storm",
+      "when": 1767896410873,
+      "tag": "0000_big_tiger_shark",
       "breakpoints": true
     }
   ]

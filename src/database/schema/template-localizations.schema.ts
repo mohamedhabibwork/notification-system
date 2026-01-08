@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
@@ -14,7 +15,7 @@ export const templateLocalizations = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    templateId: bigserial('template_id', { mode: 'number' })
+    templateId: bigint('template_id', { mode: 'number' })
       .notNull()
       .references(() => notificationTemplates.id),
     language: varchar('language', { length: 10 }).notNull(), // 'en', 'es', 'fr', 'ar', etc.

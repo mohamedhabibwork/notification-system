@@ -9,7 +9,6 @@ import { WhatsAppWebhookController } from './controllers/whatsapp-webhook.contro
 import { WPPConnectWebhookController } from './controllers/wppconnect-webhook.controller';
 import { WebhookConfigController } from './controllers/webhook-config.controller';
 import { EncryptionService } from '../../common/services/encryption.service';
-import { SessionManagerService } from '../../common/providers/implementations/whatsapp/session-manager.service';
 
 @Module({
   imports: [HttpModule],
@@ -25,8 +24,7 @@ import { SessionManagerService } from '../../common/providers/implementations/wh
     WebhookClientService,
     WebhookConfigService,
     EncryptionService,
-    SessionManagerService,
   ],
-  exports: [WebhookClientService, WebhookConfigService, SessionManagerService],
+  exports: [WebhookClientService, WebhookConfigService],
 })
 export class WebhooksModule {}

@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   integer,
   varchar,
@@ -19,10 +20,10 @@ export const bulkNotificationItems = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    bulkJobId: bigserial('bulk_job_id', { mode: 'number' })
+    bulkJobId: bigint('bulk_job_id', { mode: 'number' })
       .notNull()
       .references(() => bulkNotificationJobs.id),
-    notificationId: bigserial('notification_id', { mode: 'number' }).references(
+    notificationId: bigint('notification_id', { mode: 'number' }).references(
       () => notifications.id,
     ),
     rowNumber: integer('row_number').notNull(),

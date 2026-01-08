@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
@@ -16,7 +17,7 @@ export const featureFlags = pgTable('feature_flags', {
   name: varchar('name', { length: 100 }).unique().notNull(),
   description: text('description'),
   isEnabled: boolean('is_enabled').default(false).notNull(),
-  tenantId: bigserial('tenant_id', { mode: 'number' }).references(
+  tenantId: bigint('tenant_id', { mode: 'number' }).references(
     () => tenants.id,
   ),
   configuration: jsonb('configuration').$type<Record<string, unknown>>(),

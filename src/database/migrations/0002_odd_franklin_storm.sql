@@ -1,1 +1,0 @@
-ALTER TABLE "notification_templates" DROP CONSTRAINT "notification_templates_parent_template_id_notification_templates_id_fk";

@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   integer,
@@ -18,7 +19,7 @@ export const notificationProviders = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    tenantId: bigserial('tenant_id', { mode: 'number' })
+    tenantId: bigint('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
     channel: varchar('channel', { length: 50 }).notNull(), // email, sms, fcm, whatsapp, database, chat, messenger, push, alert, webhook, iot

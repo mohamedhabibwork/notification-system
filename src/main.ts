@@ -1,8 +1,13 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import {
+  ValidationPipe,
+  VersioningType,
+  BadRequestException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { ValidationError } from 'class-validator';
 import helmet from 'helmet';
 import compression from 'compression';
 import { join } from 'path';
@@ -11,6 +16,8 @@ import { AppModule } from './app.module';
 import { CustomLoggerService } from './common/logger/logger.service';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { GrpcExceptionFilter } from './common/filters/grpc-exception.filter';
+import { flattenValidationErrors } from './common/utils/validation-error.util';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -44,7 +51,7 @@ async function bootstrap() {
   if (keycloakServerUrl) {
     cspConnectSrc.push(keycloakServerUrl);
   }
-  
+
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -75,7 +82,9 @@ async function bootstrap() {
   );
   app.use(compression());
 
-  logger.log('🔒 Security middleware configured with CSP for Swagger UI and OAuth2');
+  logger.log(
+    '🔒 Security middleware configured with CSP for Swagger UI and OAuth2',
+  );
 
   // CORS configuration
   app.enableCors({
@@ -85,7 +94,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID'],
   });
 
-  // Global validation pipe
+  // Global validation pipe with custom error formatting
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -93,6 +102,19 @@ async function bootstrap() {
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
+      },
+      exceptionFactory: (errors: ValidationError[]) => {
+        const flattenedErrors = flattenValidationErrors(errors);
+        const errorCount = Object.keys(flattenedErrors).length;
+        const message =
+          errorCount === 1
+            ? 'Validation failed for 1 field'
+            : `Validation failed for ${errorCount} fields`;
+
+        return new BadRequestException({
+          message,
+          errors: flattenedErrors,
+        });
       },
     }),
   );
@@ -109,7 +131,7 @@ async function bootstrap() {
 
   // Swagger configuration - OAuth2 redirect URL must match the route in auth.controller.ts
   const swaggerRedirectUrl = `${appUrl}/api/oauth2-redirect.html`;
-  
+
   const configBuilder = new DocumentBuilder()
     .setTitle('Multi-Tenant Notification System API')
     .setDescription(
@@ -192,7 +214,7 @@ async function bootstrap() {
   if (keycloakServerUrl && keycloakRealm && keycloakUserClientId) {
     const authorizationUrl = `${keycloakServerUrl}/realms/${keycloakRealm}/protocol/openid-connect/auth`;
     const tokenUrl = `${keycloakServerUrl}/realms/${keycloakRealm}/protocol/openid-connect/token`;
-    
+
     configBuilder.addOAuth2(
       {
         type: 'oauth2',
@@ -215,7 +237,8 @@ async function bootstrap() {
             },
           },
         },
-        description: 'OAuth2/OIDC authentication using Keycloak (supports username/password and authorization code flows)',
+        description:
+          'OAuth2/OIDC authentication using Keycloak (supports username/password and authorization code flows)',
       },
       'oauth2',
     );
@@ -227,13 +250,23 @@ async function bootstrap() {
     logger.log(`   Redirect URI: ${swaggerRedirectUrl}`);
     logger.log(`   Client ID: ${keycloakUserClientId}`);
     logger.log('\n📝 Available Authentication Methods:');
-    logger.log('   1. Password Flow: Enter username/password directly in Swagger UI');
-    logger.log('   2. Authorization Code Flow: Redirect to Keycloak login page');
+    logger.log(
+      '   1. Password Flow: Enter username/password directly in Swagger UI',
+    );
+    logger.log(
+      '   2. Authorization Code Flow: Redirect to Keycloak login page',
+    );
     logger.log('\n⚠️  KEYCLOAK CLIENT CONFIGURATION REQUIRED:');
     logger.log('   1. Access Type: MUST be "public" (NOT confidential)');
-    logger.log('   2. Standard Flow Enabled: MUST be ON (for authorization code flow)');
-    logger.log('   3. Direct Access Grants Enabled: MUST be ON (for password flow)');
-    logger.log(`   4. Valid Redirect URIs: MUST include "${swaggerRedirectUrl}"`);
+    logger.log(
+      '   2. Standard Flow Enabled: MUST be ON (for authorization code flow)',
+    );
+    logger.log(
+      '   3. Direct Access Grants Enabled: MUST be ON (for password flow)',
+    );
+    logger.log(
+      `   4. Valid Redirect URIs: MUST include "${swaggerRedirectUrl}"`,
+    );
     logger.log(`   5. Web Origins: MUST include "${appUrl}" or "*"`);
     logger.log('   6. PKCE: Should be enabled (default for public clients)');
   }
@@ -241,8 +274,108 @@ async function bootstrap() {
   const config = configBuilder.build();
   const document = SwaggerModule.createDocument(app, config);
 
+  // Add error response schemas to components
+  if (!document.components) {
+    document.components = {};
+  }
+  if (!document.components.schemas) {
+    document.components.schemas = {};
+  }
+
+  // Add ValidationErrorResponse schema
+  document.components.schemas.ValidationErrorResponse = {
+    type: 'object',
+    properties: {
+      statusCode: {
+        type: 'integer',
+        example: 400,
+        description: 'HTTP status code',
+      },
+      timestamp: {
+        type: 'string',
+        format: 'date-time',
+        example: '2026-01-08T10:30:00.000Z',
+        description: 'Timestamp when the error occurred',
+      },
+      path: {
+        type: 'string',
+        example: '/api/v1/notifications',
+        description: 'Request path that caused the error',
+      },
+      method: {
+        type: 'string',
+        example: 'POST',
+        description: 'HTTP method used',
+      },
+      message: {
+        type: 'string',
+        example: 'Validation failed for 2 fields',
+        description: 'Error message',
+      },
+      error: {
+        type: 'string',
+        example: 'Bad Request',
+        description: 'Error type',
+      },
+      errors: {
+        type: 'object',
+        description:
+          'Validation errors grouped by field name with arrays of error messages',
+        additionalProperties: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        example: {
+          name: ['name must be a string', 'name should not be empty'],
+          'recipient.email': ['recipient.email must be an email address'],
+          priority: ['priority must be a valid enum value'],
+        },
+      },
+    },
+  };
+
+  // Add generic error response schema
+  document.components.schemas.ErrorResponse = {
+    type: 'object',
+    properties: {
+      statusCode: {
+        type: 'integer',
+        example: 500,
+        description: 'HTTP status code',
+      },
+      timestamp: {
+        type: 'string',
+        format: 'date-time',
+        example: '2026-01-08T10:30:00.000Z',
+        description: 'Timestamp when the error occurred',
+      },
+      path: {
+        type: 'string',
+        example: '/api/v1/notifications',
+        description: 'Request path that caused the error',
+      },
+      method: {
+        type: 'string',
+        example: 'POST',
+        description: 'HTTP method used',
+      },
+      message: {
+        type: 'string',
+        example: 'Internal server error',
+        description: 'Error message',
+      },
+      error: {
+        type: 'string',
+        example: 'Internal Server Error',
+        description: 'Error type',
+      },
+    },
+  };
+
   // Swagger UI setup options with OAuth2 token handler
-  const swaggerOptions: any = {
+  const swaggerOptions: Record<string, unknown> = {
     swaggerOptions: {
       persistAuthorization: true,
       displayOperationId: false,
@@ -327,8 +460,12 @@ async function bootstrap() {
 
   // Only add OAuth2 redirect if Keycloak is configured
   if (keycloakServerUrl && keycloakRealm && keycloakUserClientId) {
-    swaggerOptions.swaggerOptions.oauth2RedirectUrl = swaggerRedirectUrl;
-    swaggerOptions.swaggerOptions.initOAuth = {
+    const swaggerOpts = swaggerOptions.swaggerOptions as Record<
+      string,
+      unknown
+    >;
+    swaggerOpts.oauth2RedirectUrl = swaggerRedirectUrl;
+    swaggerOpts.initOAuth = {
       clientId: keycloakUserClientId,
       appName: 'Notification Service',
       scopeSeparator: ' ',
@@ -339,7 +476,12 @@ async function bootstrap() {
     };
   }
 
-  SwaggerModule.setup('api', app, document, swaggerOptions);
+  SwaggerModule.setup(
+    'api',
+    app,
+    document,
+    swaggerOptions as Parameters<typeof SwaggerModule.setup>[3],
+  );
 
   // Global prefix
   app.setGlobalPrefix('');
@@ -369,6 +511,9 @@ async function bootstrap() {
       },
     );
 
+    // Apply gRPC exception filter for consistent error handling
+    grpcApp.useGlobalFilters(new GrpcExceptionFilter());
+
     await grpcApp.listen();
     logger.log(`🔌 gRPC microservice started on port ${grpcPort}`);
   }
@@ -387,4 +532,4 @@ async function bootstrap() {
   }
 }
 
-bootstrap();
+void bootstrap();

@@ -1,6 +1,7 @@
 import {
   pgTable,
   bigserial,
+  bigint,
   uuid,
   varchar,
   text,
@@ -21,18 +22,18 @@ export const notificationTemplates = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     uuid: uuid('uuid').defaultRandom().unique().notNull(),
-    tenantId: bigserial('tenant_id', { mode: 'number' })
+    tenantId: bigint('tenant_id', { mode: 'number' })
       .notNull()
       .references(() => tenants.id),
     name: varchar('name', { length: 255 }).notNull(),
     templateCode: varchar('template_code', { length: 100 }).unique().notNull(),
-    templateTypeId: bigserial('template_type_id', {
+    templateTypeId: bigint('template_type_id', {
       mode: 'number',
     }).references(() => lookups.id),
-    categoryId: bigserial('category_id', { mode: 'number' }).references(
+    categoryId: bigint('category_id', { mode: 'number' }).references(
       () => templateCategories.id,
     ),
-    parentTemplateId: bigserial('parent_template_id', { mode: 'number' }),
+    parentTemplateId: bigint('parent_template_id', { mode: 'number' }),
     channel: varchar('channel', { length: 50 }).notNull(), // email, sms, fcm, whatsapp
     subject: varchar('subject', { length: 500 }),
     bodyTemplate: text('body_template').notNull(),

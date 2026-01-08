@@ -8,7 +8,9 @@ import {
 import { MetricsService } from './metrics.service';
 import { ObservabilityMetricsService } from '../observability/metrics.service';
 import { Public } from '../../modules/auth/decorators/public.decorator';
+import { ApiTenantHeader } from '../decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('System')
 @Controller('metrics')
 export class MetricsController {

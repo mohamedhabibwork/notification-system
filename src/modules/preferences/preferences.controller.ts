@@ -13,7 +13,9 @@ import {
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('User - Preferences')
 @ApiBearerAuth()
 @Controller({ path: 'users/me/preferences', version: '1' })

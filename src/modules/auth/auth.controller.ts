@@ -33,7 +33,9 @@ import {
   TokenValidationResponseDto,
 } from './dto/token-validation.dto';
 import { AuthInfoResponseDto } from './dto/auth-info.dto';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Authentication')
 @Controller('api')
 export class AuthController {

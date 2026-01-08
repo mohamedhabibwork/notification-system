@@ -31,7 +31,9 @@ import type { UserContext } from '../../auth/decorators/current-user.decorator';
 import { CurrentTenant } from '../../auth/decorators/current-tenant.decorator';
 import { Roles } from '../../auth/decorators/roles.decorator';
 import { WebhookClientService } from '../webhook-client.service';
+import { ApiTenantHeader } from '../../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Admin - Webhooks')
 @ApiBearerAuth()
 @Controller({ path: 'admin/webhooks', version: '1' })

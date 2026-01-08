@@ -20,7 +20,9 @@ import { CreateLookupTypeDto, UpdateLookupTypeDto } from './dto/lookup-type.dto'
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { Public } from '../auth/decorators/public.decorator';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Lookup Types')
 @ApiBearerAuth()
 @Controller({ path: 'lookup-types', version: '1' })

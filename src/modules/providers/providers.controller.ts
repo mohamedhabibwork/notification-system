@@ -21,7 +21,9 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Admin - Providers')
 @ApiBearerAuth()
 @Controller({ path: 'admin/providers', version: '1' })

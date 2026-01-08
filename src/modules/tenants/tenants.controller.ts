@@ -19,7 +19,9 @@ import { CreateTenantDto, UpdateTenantDto } from './dto/tenant.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Admin - Tenants')
 @ApiBearerAuth()
 @Controller({ path: 'admin/tenants', version: '1' })

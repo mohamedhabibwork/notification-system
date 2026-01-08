@@ -23,7 +23,9 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 import { Scopes } from '../auth/decorators/scopes.decorator';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Services - Notifications')
 @ApiSecurity('bearer')
 @Controller({ path: 'services/notifications', version: '1' })
@@ -91,6 +93,7 @@ export class NotificationsController {
   }
 }
 
+@ApiTenantHeader()
 @ApiTags('Admin - Notifications')
 @ApiSecurity('bearer')
 @Controller('api/v1/admin/notifications')

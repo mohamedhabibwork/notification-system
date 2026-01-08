@@ -23,7 +23,9 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
 import { Scopes } from '../auth/decorators/scopes.decorator';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Services - Bulk Notifications')
 @ApiSecurity('bearer')
 @Controller({ path: 'services/notifications/bulk', version: '1' })

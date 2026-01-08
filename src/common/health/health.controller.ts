@@ -1,6 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTenantHeader } from '../decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('System')
 @Controller('health')
 export class HealthController {

@@ -95,32 +95,60 @@ export class CreateTemplateDto {
 }
 
 export class UpdateTemplateDto {
+  @ApiPropertyOptional({
+    description: 'Template name',
+    example: 'Welcome Email',
+  })
   @IsString()
   @IsOptional()
   name?: string;
 
+  @ApiPropertyOptional({
+    description: 'Email subject line',
+    example: 'Welcome to {{companyName}}!',
+  })
   @IsString()
   @IsOptional()
   subject?: string;
 
+  @ApiPropertyOptional({
+    description: 'Template body with Handlebars syntax',
+    example: 'Hello {{name}}, welcome!',
+  })
   @IsString()
   @IsOptional()
   bodyTemplate?: string;
 
+  @ApiPropertyOptional({
+    description: 'HTML template body',
+    example: '<h1>Hello {{name}}</h1>',
+  })
   @IsString()
   @IsOptional()
   htmlTemplate?: string;
 
+  @ApiPropertyOptional({
+    description: 'Template variables schema',
+    example: { name: 'string', email: 'string' },
+  })
   @IsObject()
   @IsOptional()
   variables?: Record<string, unknown>;
 
+  @ApiPropertyOptional({
+    description: 'Whether the template is active',
+    example: true,
+  })
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
 }
 
 export class TemplatePreviewDto {
+  @ApiProperty({
+    description: 'Variables to use for template rendering',
+    example: { name: 'John Doe', orderId: '12345' },
+  })
   @IsObject()
   variables: Record<string, unknown>;
 }

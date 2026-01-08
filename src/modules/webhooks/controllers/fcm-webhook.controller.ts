@@ -1,7 +1,9 @@
 import { Controller, Post, Body, Headers, Logger } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Public } from '../../auth/decorators/public.decorator';
+import { ApiTenantHeader } from '../../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Webhooks - FCM')
 @Controller('webhooks/fcm')
 export class FcmWebhookController {

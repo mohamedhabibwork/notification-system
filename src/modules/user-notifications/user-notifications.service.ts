@@ -18,15 +18,46 @@ export class UserNotificationsService {
   constructor(@Inject(DRIZZLE_ORM) private readonly db: DrizzleDB) {}
 
   async findUserNotifications(
-    userId: string,
-    tenantId: number,
+    userId: string | undefined,
+    tenantId: number | undefined,
     query: UserNotificationQueryDto,
+    userRoles: string[] = [],
   ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    // Check if user is admin
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
     const conditions = [
-      eq(notifications.recipientUserId, userId),
       eq(notifications.tenantId, tenantId),
       isNull(notifications.deletedAt),
     ];
+
+    // Admin can filter by userId/userType from query params
+    if (isAdmin) {
+      // If admin provides userId filter, use it
+      if (query.userId) {
+        conditions.push(eq(notifications.recipientUserId, query.userId));
+      }
+      // If admin provides userType filter, use it
+      if (query.userType) {
+        conditions.push(eq(notifications.recipientUserType, query.userType));
+      }
+      // If no filters provided by admin, show all notifications in tenant
+    } else {
+      // Non-admin users can only see their own notifications
+      if (userId) {
+        conditions.push(eq(notifications.recipientUserId, userId));
+      }
+    }
 
     // Filter by status
     if (query.status) {
@@ -74,17 +105,39 @@ export class UserNotificationsService {
     return results;
   }
 
-  async findOneUserNotification(id: number, userId: string, tenantId: number) {
+  async findOneUserNotification(
+    id: number,
+    userId: string | undefined,
+    tenantId: number | undefined,
+    userRoles: string[] = [],
+  ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    // Check if user is admin
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
+    const conditions = [
+      eq(notifications.id, id),
+      eq(notifications.tenantId, tenantId),
+    ];
+
+    // Non-admin users can only see their own notifications
+    if (!isAdmin && userId) {
+      conditions.push(eq(notifications.recipientUserId, userId));
+    }
+
     const [notification] = await this.db
       .select()
       .from(notifications)
-      .where(
-        and(
-          eq(notifications.id, id),
-          eq(notifications.recipientUserId, userId),
-          eq(notifications.tenantId, tenantId),
-        ),
-      );
+      .where(and(...conditions));
 
     if (!notification) {
       throw new NotFoundException(`Notification with ID ${id} not found`);
@@ -93,9 +146,41 @@ export class UserNotificationsService {
     return notification;
   }
 
-  async markAsRead(id: number, userId: string, tenantId: number) {
-    // Verify ownership
-    await this.findOneUserNotification(id, userId, tenantId);
+  async markAsRead(
+    id: number,
+    userId: string | undefined,
+    tenantId: number | undefined,
+    userRoles: string[] = [],
+  ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
+    // Verify existence and ownership
+    const notification = await this.findOneUserNotification(
+      id,
+      userId,
+      tenantId,
+      userRoles,
+    );
+
+    const conditions = [
+      eq(notifications.id, id),
+      eq(notifications.tenantId, tenantId),
+    ];
+
+    // Non-admin users can only update their own notifications
+    if (!isAdmin && userId) {
+      conditions.push(eq(notifications.recipientUserId, userId));
+    }
 
     const [updated] = await this.db
       .update(notifications)
@@ -103,21 +188,47 @@ export class UserNotificationsService {
         readAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(notifications.id, id),
-          eq(notifications.recipientUserId, userId),
-          eq(notifications.tenantId, tenantId),
-        ),
-      )
+      .where(and(...conditions))
       .returning();
 
     return updated;
   }
 
-  async markAsUnread(id: number, userId: string, tenantId: number) {
-    // Verify ownership
-    await this.findOneUserNotification(id, userId, tenantId);
+  async markAsUnread(
+    id: number,
+    userId: string | undefined,
+    tenantId: number | undefined,
+    userRoles: string[] = [],
+  ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
+    // Verify existence and ownership
+    const notification = await this.findOneUserNotification(
+      id,
+      userId,
+      tenantId,
+      userRoles,
+    );
+
+    const conditions = [
+      eq(notifications.id, id),
+      eq(notifications.tenantId, tenantId),
+    ];
+
+    // Non-admin users can only update their own notifications
+    if (!isAdmin && userId) {
+      conditions.push(eq(notifications.recipientUserId, userId));
+    }
 
     const [updated] = await this.db
       .update(notifications)
@@ -125,21 +236,47 @@ export class UserNotificationsService {
         readAt: null,
         updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(notifications.id, id),
-          eq(notifications.recipientUserId, userId),
-          eq(notifications.tenantId, tenantId),
-        ),
-      )
+      .where(and(...conditions))
       .returning();
 
     return updated;
   }
 
-  async deleteNotification(id: number, userId: string, tenantId: number) {
-    // Verify ownership
-    await this.findOneUserNotification(id, userId, tenantId);
+  async deleteNotification(
+    id: number,
+    userId: string | undefined,
+    tenantId: number | undefined,
+    userRoles: string[] = [],
+  ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
+    // Verify existence and ownership
+    const notification = await this.findOneUserNotification(
+      id,
+      userId,
+      tenantId,
+      userRoles,
+    );
+
+    const conditions = [
+      eq(notifications.id, id),
+      eq(notifications.tenantId, tenantId),
+    ];
+
+    // Non-admin users can only delete their own notifications
+    if (!isAdmin && userId) {
+      conditions.push(eq(notifications.recipientUserId, userId));
+    }
 
     const [deleted] = await this.db
       .update(notifications)
@@ -147,28 +284,53 @@ export class UserNotificationsService {
         deletedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(notifications.id, id),
-          eq(notifications.recipientUserId, userId),
-          eq(notifications.tenantId, tenantId),
-        ),
-      )
+      .where(and(...conditions))
       .returning();
 
     return deleted;
   }
 
   async bulkDelete(
-    userId: string,
-    tenantId: number,
+    userId: string | undefined,
+    tenantId: number | undefined,
     bulkDeleteDto: BulkDeleteDto,
+    userRoles: string[] = [],
   ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
     const conditions = [
-      eq(notifications.recipientUserId, userId),
       eq(notifications.tenantId, tenantId),
       isNull(notifications.deletedAt),
     ];
+
+    // Admin can filter by userId/userType
+    if (isAdmin) {
+      if (bulkDeleteDto.userId) {
+        conditions.push(
+          eq(notifications.recipientUserId, bulkDeleteDto.userId),
+        );
+      }
+      if (bulkDeleteDto.userType) {
+        conditions.push(
+          eq(notifications.recipientUserType, bulkDeleteDto.userType),
+        );
+      }
+    } else {
+      // Non-admin deletes only their own
+      if (userId) {
+        conditions.push(eq(notifications.recipientUserId, userId));
+      }
+    }
 
     // Delete by specific IDs
     if (
@@ -217,39 +379,101 @@ export class UserNotificationsService {
     };
   }
 
-  async getUnreadCount(userId: string, tenantId: number) {
+  async getUnreadCount(
+    userId: string | undefined,
+    tenantId: number | undefined,
+    query: UserNotificationQueryDto,
+    userRoles: string[] = [],
+  ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
+    const conditions = [
+      eq(notifications.tenantId, tenantId),
+      isNull(notifications.readAt),
+      isNull(notifications.deletedAt),
+    ];
+
+    // Admin can filter by userId/userType
+    if (isAdmin) {
+      if (query.userId) {
+        conditions.push(eq(notifications.recipientUserId, query.userId));
+      }
+      if (query.userType) {
+        conditions.push(eq(notifications.recipientUserType, query.userType));
+      }
+    } else {
+      // Non-admin sees only their own
+      if (userId) {
+        conditions.push(eq(notifications.recipientUserId, userId));
+      }
+    }
+
     const results = await this.db
       .select()
       .from(notifications)
-      .where(
-        and(
-          eq(notifications.recipientUserId, userId),
-          eq(notifications.tenantId, tenantId),
-          isNull(notifications.readAt),
-          isNull(notifications.deletedAt),
-        ),
-      );
+      .where(and(...conditions));
 
     return {
       unreadCount: results.length,
     };
   }
 
-  async markAllAsRead(userId: string, tenantId: number) {
+  async markAllAsRead(
+    userId: string | undefined,
+    tenantId: number | undefined,
+    query: UserNotificationQueryDto,
+    userRoles: string[] = [],
+  ) {
+    // Validate tenantId - always required
+    if (!tenantId) {
+      throw new ForbiddenException(
+        'Tenant ID is required. Please provide x-tenant-id header or ensure your JWT contains tenant_id.',
+      );
+    }
+
+    const isAdmin =
+      userRoles.includes('admin') ||
+      userRoles.includes('system-admin') ||
+      userRoles.includes('super-admin');
+
+    const conditions = [
+      eq(notifications.tenantId, tenantId),
+      isNull(notifications.deletedAt),
+      isNull(notifications.readAt),
+    ];
+
+    // Admin can filter by userId/userType
+    if (isAdmin) {
+      if (query.userId) {
+        conditions.push(eq(notifications.recipientUserId, query.userId));
+      }
+      if (query.userType) {
+        conditions.push(eq(notifications.recipientUserType, query.userType));
+      }
+    } else {
+      // Non-admin marks only their own
+      if (userId) {
+        conditions.push(eq(notifications.recipientUserId, userId));
+      }
+    }
+
     const result = await this.db
       .update(notifications)
       .set({
         readAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(
-        and(
-          eq(notifications.recipientUserId, userId),
-          eq(notifications.tenantId, tenantId),
-          isNull(notifications.readAt),
-          isNull(notifications.deletedAt),
-        ),
-      )
+      .where(and(...conditions))
       .returning();
 
     return {

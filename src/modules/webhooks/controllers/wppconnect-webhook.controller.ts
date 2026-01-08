@@ -18,7 +18,9 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Public } from '../../auth/decorators/public.decorator';
 import { SessionManagerService } from '../../../common/providers/implementations/whatsapp/session-manager.service';
+import { ApiTenantHeader } from '../../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('Webhooks - WPPConnect')
 @Controller('webhooks/wppconnect')
 export class WPPConnectWebhookController {

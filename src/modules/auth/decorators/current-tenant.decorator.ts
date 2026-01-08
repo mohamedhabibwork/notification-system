@@ -7,13 +7,28 @@ export const CurrentTenant = createParamDecorator(
 
     // Try to get tenant_id from user context
     if (user?.tenant_id) {
-      return parseInt(user.tenant_id, 10);
+      const parsed = parseInt(user.tenant_id, 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
     }
 
     // Try to get from request headers
     const tenantHeader = request.headers['x-tenant-id'];
     if (tenantHeader) {
-      return parseInt(tenantHeader, 10);
+      const parsed = parseInt(tenantHeader, 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    // Try to get from query params (fallback)
+    const tenantQuery = request.query?.tenantId;
+    if (tenantQuery) {
+      const parsed = parseInt(tenantQuery, 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
     }
 
     return undefined;

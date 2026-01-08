@@ -23,7 +23,9 @@ import {
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { UserContext } from '../auth/decorators/current-user.decorator';
 import { CurrentTenant } from '../auth/decorators/current-tenant.decorator';
+import { ApiTenantHeader } from '../../common/decorators/api-tenant-header.decorator';
 
+@ApiTenantHeader()
 @ApiTags('User - Notifications')
 @ApiBearerAuth()
 @Controller({ path: 'users/me/notifications', version: '1' })
@@ -33,20 +35,33 @@ export class UserNotificationsController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get my notifications' })
+  @ApiOperation({
+    summary: 'Get notifications',
+    description:
+      'Get notifications. Regular users see only their own. Admins can filter by userId or userType.',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Returns list of user notifications',
+    description: 'Returns list of notifications',
   })
   findAll(
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
     @Query() query: UserNotificationQueryDto,
   ) {
+    // Extract roles from user context
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
     return this.userNotificationsService.findUserNotifications(
-      user.sub,
+      user?.sub,
       tenantId,
       query,
+      roles,
     );
   }
 
@@ -55,9 +70,22 @@ export class UserNotificationsController {
   @ApiResponse({ status: 200, description: 'Returns unread count' })
   getUnreadCount(
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
+    @Query() query: UserNotificationQueryDto,
   ) {
-    return this.userNotificationsService.getUnreadCount(user.sub, tenantId);
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
+    return this.userNotificationsService.getUnreadCount(
+      user?.sub,
+      tenantId,
+      query,
+      roles,
+    );
   }
 
   @Get(':id')
@@ -66,12 +94,20 @@ export class UserNotificationsController {
   findOne(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
   ) {
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
     return this.userNotificationsService.findOneUserNotification(
       id,
-      user.sub,
+      user?.sub,
       tenantId,
+      roles,
     );
   }
 
@@ -81,9 +117,21 @@ export class UserNotificationsController {
   markAsRead(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
   ) {
-    return this.userNotificationsService.markAsRead(id, user.sub, tenantId);
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
+    return this.userNotificationsService.markAsRead(
+      id,
+      user?.sub,
+      tenantId,
+      roles,
+    );
   }
 
   @Patch(':id/unread')
@@ -92,9 +140,21 @@ export class UserNotificationsController {
   markAsUnread(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
   ) {
-    return this.userNotificationsService.markAsUnread(id, user.sub, tenantId);
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
+    return this.userNotificationsService.markAsUnread(
+      id,
+      user?.sub,
+      tenantId,
+      roles,
+    );
   }
 
   @Delete(':id')
@@ -106,17 +166,29 @@ export class UserNotificationsController {
   deleteNotification(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
   ) {
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
     return this.userNotificationsService.deleteNotification(
       id,
-      user.sub,
+      user?.sub,
       tenantId,
+      roles,
     );
   }
 
   @Delete()
-  @ApiOperation({ summary: 'Bulk delete notifications' })
+  @ApiOperation({
+    summary: 'Bulk delete notifications',
+    description:
+      'Bulk delete notifications. Admins can specify userId/userType filters in the body.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Notifications deleted successfully',
@@ -124,22 +196,47 @@ export class UserNotificationsController {
   bulkDelete(
     @Body() bulkDeleteDto: BulkDeleteDto,
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
   ) {
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
     return this.userNotificationsService.bulkDelete(
-      user.sub,
+      user?.sub,
       tenantId,
       bulkDeleteDto,
+      roles,
     );
   }
 
   @Post('mark-all-read')
-  @ApiOperation({ summary: 'Mark all notifications as read' })
+  @ApiOperation({
+    summary: 'Mark all notifications as read',
+    description:
+      'Mark all notifications as read. Admins can optionally specify userId or userType in query params.',
+  })
   @ApiResponse({ status: 200, description: 'All notifications marked as read' })
   markAllAsRead(
     @CurrentUser() user: UserContext,
-    @CurrentTenant() tenantId: number,
+    @CurrentTenant() tenantId: number | undefined,
+    @Query() query: UserNotificationQueryDto,
   ) {
-    return this.userNotificationsService.markAllAsRead(user.sub, tenantId);
+    const roles = [
+      ...(user?.realm_access?.roles || []),
+      ...(Object.values(user?.resource_access || {}).flatMap(
+        (resource: any) => resource.roles || [],
+      )),
+    ];
+
+    return this.userNotificationsService.markAllAsRead(
+      user?.sub,
+      tenantId,
+      query,
+      roles,
+    );
   }
 }

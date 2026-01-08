@@ -241,7 +241,7 @@ async function bootstrap() {
   const config = configBuilder.build();
   const document = SwaggerModule.createDocument(app, config);
 
-  // Swagger UI setup options
+  // Swagger UI setup options with OAuth2 token handler
   const swaggerOptions: any = {
     swaggerOptions: {
       persistAuthorization: true,
@@ -263,9 +263,66 @@ async function bootstrap() {
       .swagger-ui .scheme-container { margin: 20px 0; }
       .swagger-ui .auth-wrapper { margin-top: 20px; }
     `,
-    customJs: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.10.3/swagger-ui-standalone-preset.min.js',
-    ],
+    customJsStr: `
+      // Custom script to automatically apply OAuth2 tokens to bearer auth
+      (function() {
+        const checkAndInitialize = () => {
+          if (window.ui) {
+            const ui = window.ui;
+            
+            // Store original preauthorizeApiKey function
+            const originalPreauthorizeApiKey = ui.preauthorizeApiKey;
+            
+            // Override authorize function to sync OAuth2 token to bearer
+            const originalAuthSelectors = ui.authSelectors;
+            if (originalAuthSelectors) {
+              // Watch for authorization changes
+              let lastCheck = Date.now();
+              setInterval(() => {
+                if (Date.now() - lastCheck < 500) return; // Throttle
+                lastCheck = Date.now();
+                
+                try {
+                  const authorized = ui.authSelectors.authorized();
+                  if (authorized && authorized.get) {
+                    const oauth2Auth = authorized.get('oauth2');
+                    if (oauth2Auth && oauth2Auth.get) {
+                      const token = oauth2Auth.get('token');
+                      if (token && token.get) {
+                        const accessToken = token.get('access_token');
+                        if (accessToken) {
+                          // Also authorize bearer with the same token
+                          const bearerAuth = authorized.get('bearer');
+                          const currentBearerToken = bearerAuth && bearerAuth.get ? bearerAuth.get('value') : null;
+                          
+                          if (!currentBearerToken || currentBearerToken !== accessToken) {
+                            ui.preauthorizeApiKey('bearer', accessToken);
+                            console.log('✅ OAuth2 access token automatically applied to bearer auth');
+                          }
+                        }
+                      }
+                    }
+                  }
+                } catch (e) {
+                  // Silently handle errors in token sync
+                }
+              }, 1000);
+            }
+            
+            console.log('🔐 OAuth2 to Bearer token sync initialized');
+          } else {
+            // Retry if UI not loaded yet
+            setTimeout(checkAndInitialize, 100);
+          }
+        };
+        
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', checkAndInitialize);
+        } else {
+          checkAndInitialize();
+        }
+      })();
+    `,
   };
 
   // Only add OAuth2 redirect if Keycloak is configured

@@ -85,15 +85,31 @@ async function bootstrap() {
       
       ## Authentication
       
-      This API uses Bearer token authentication. Include your JWT token in the Authorization header:
-      \`\`\`
-      Authorization: Bearer <your-token>
-      \`\`\`
+      This API supports multiple authentication methods:
       
-      ### Getting a Token
+      ### Method 1: Username/Password (Recommended for Testing)
       
-      1. **Via Keycloak (OAuth2)**: Click the "Authorize" button and use OAuth2 flow
-      2. **Via Direct Token**: Get token from Keycloak and paste it in the Bearer auth field
+      1. Click the **Authorize** button (🔓)
+      2. Select **oauth2 (OAuth2, password)**
+      3. Enter your Keycloak username and password
+      4. Click **Authorize**
+      
+      This method exchanges your credentials for a token directly without redirecting to Keycloak.
+      
+      ### Method 2: OAuth2 Authorization Code Flow
+      
+      1. Click the **Authorize** button (🔓)
+      2. Select **oauth2 (OAuth2, authorizationCode)**
+      3. Click **Authorize** - you'll be redirected to Keycloak login
+      4. Log in and you'll be redirected back to Swagger UI
+      
+      ### Method 3: Bearer Token (Manual)
+      
+      If you already have a token:
+      1. Click the **Authorize** button (🔓)
+      2. Select **bearer (http, Bearer)**
+      3. Paste your JWT token
+      4. Click **Authorize**
       
       ## API Groups
       
@@ -147,6 +163,14 @@ async function bootstrap() {
       {
         type: 'oauth2',
         flows: {
+          password: {
+            tokenUrl,
+            scopes: {
+              openid: 'OpenID Connect',
+              profile: 'User profile information',
+              email: 'User email address',
+            },
+          },
           authorizationCode: {
             authorizationUrl,
             tokenUrl,
@@ -157,23 +181,27 @@ async function bootstrap() {
             },
           },
         },
-        description: 'OAuth2 authentication using Keycloak',
+        description: 'OAuth2/OIDC authentication using Keycloak (supports username/password and authorization code flows)',
       },
       'oauth2',
     );
 
     // Log OAuth2 configuration for debugging
-    logger.log('\n🔐 OAuth2 Configuration:');
+    logger.log('\n🔐 OAuth2/OIDC Configuration:');
     logger.log(`   Authorization URL: ${authorizationUrl}`);
     logger.log(`   Token URL: ${tokenUrl}`);
     logger.log(`   Redirect URI: ${swaggerRedirectUrl}`);
     logger.log(`   Client ID: ${keycloakUserClientId}`);
+    logger.log('\n📝 Available Authentication Methods:');
+    logger.log('   1. Password Flow: Enter username/password directly in Swagger UI');
+    logger.log('   2. Authorization Code Flow: Redirect to Keycloak login page');
     logger.log('\n⚠️  KEYCLOAK CLIENT CONFIGURATION REQUIRED:');
     logger.log('   1. Access Type: MUST be "public" (NOT confidential)');
-    logger.log('   2. Standard Flow Enabled: MUST be ON');
-    logger.log(`   3. Valid Redirect URIs: MUST include "${swaggerRedirectUrl}"`);
-    logger.log(`   4. Web Origins: MUST include "${appUrl}" or "*"`);
-    logger.log('   5. PKCE: Should be enabled (default for public clients)');
+    logger.log('   2. Standard Flow Enabled: MUST be ON (for authorization code flow)');
+    logger.log('   3. Direct Access Grants Enabled: MUST be ON (for password flow)');
+    logger.log(`   4. Valid Redirect URIs: MUST include "${swaggerRedirectUrl}"`);
+    logger.log(`   5. Web Origins: MUST include "${appUrl}" or "*"`);
+    logger.log('   6. PKCE: Should be enabled (default for public clients)');
   }
 
   const config = configBuilder.build();

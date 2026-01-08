@@ -52,13 +52,13 @@ http://localhost:3000
 
 Make sure these settings are correct:
 
-| Setting | Required Value |
-|---------|---------------|
-| **Access Type** | `public` |
-| **Standard Flow Enabled** | `ON` ✓ |
-| **Direct Access Grants Enabled** | `ON` ✓ |
-| **Valid Redirect URIs** | `http://localhost:3000/api/oauth2-redirect.html` |
-| **Web Origins** | `http://localhost:3000` or `*` |
+| Setting | Required Value | Purpose |
+|---------|---------------|---------|
+| **Access Type** | `public` | Allows browser-based authentication |
+| **Standard Flow Enabled** | `ON` ✓ | Enables authorization code flow (redirect) |
+| **Direct Access Grants Enabled** | `ON` ✓ | **Enables username/password flow** ⭐ |
+| **Valid Redirect URIs** | `http://localhost:3000/api/oauth2-redirect.html` | For authorization code flow |
+| **Web Origins** | `http://localhost:3000` or `*` | Prevents CORS errors |
 
 #### 6. Save Changes
 
@@ -78,9 +78,24 @@ Click **Save** at the bottom of the page.
 7. Click **Authorize**
 8. You should be redirected to Keycloak login
 
-### Using Bearer Token Instead
+### Using Username/Password Authentication (Recommended) ⭐
 
-If OAuth2 flow isn't working or you prefer direct token authentication:
+The easiest way to authenticate in Swagger UI:
+
+1. In Swagger UI, click **Authorize**
+2. Select **oauth2 (OAuth2, password)**
+3. Enter your Keycloak username and password
+4. Enter Client ID: `notification-client`
+5. Check scopes: `openid`, `profile`, `email`
+6. Click **Authorize**
+
+**Note**: This requires **Direct Access Grants Enabled** to be `ON` in Keycloak client settings.
+
+See [Username/Password Authentication Guide](./SWAGGER_PASSWORD_AUTH.md) for detailed instructions.
+
+### Using Bearer Token (Alternative)
+
+If you already have a token:
 
 1. Get a token from Keycloak:
    ```bash

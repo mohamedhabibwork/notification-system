@@ -39,9 +39,43 @@ async function bootstrap() {
   logger.setContext('Bootstrap');
   app.useLogger(logger);
 
-  // Security middleware
-  app.use(helmet());
+  // Security middleware with CSP configuration for Swagger UI and Keycloak
+  const cspConnectSrc = ["'self'"];
+  if (keycloakServerUrl) {
+    cspConnectSrc.push(keycloakServerUrl);
+  }
+  
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'", // Required for Swagger UI inline scripts
+            'https://cdnjs.cloudflare.com', // Swagger UI CDN
+          ],
+          styleSrc: [
+            "'self'",
+            "'unsafe-inline'", // Required for Swagger UI inline styles
+            'https://cdnjs.cloudflare.com',
+          ],
+          imgSrc: [
+            "'self'",
+            'data:', // Required for Swagger UI base64 images
+            'https:', // Allow HTTPS images
+          ],
+          connectSrc: cspConnectSrc, // Allow API calls and Keycloak connections
+          fontSrc: ["'self'", 'data:', 'https://cdnjs.cloudflare.com'],
+          frameSrc: ["'self'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false, // Required for Swagger UI OAuth2
+    }),
+  );
   app.use(compression());
+
+  logger.log('🔒 Security middleware configured with CSP for Swagger UI and OAuth2');
 
   // CORS configuration
   app.enableCors({

@@ -74,7 +74,7 @@
     "@whiskeysockets/baileys": "^7.0.0-rc.9",
     "@wppconnect-team/wppconnect": "^1.37.9",
     "apollo-server-express": "^3.13.0",
-    "axios": "^1.13.2",
+    "axios": "^1.15.0",
     "bullmq": "^5.66.4",
     "cache-manager": "^7.2.7",
     "class-transformer": "^0.5.1",
